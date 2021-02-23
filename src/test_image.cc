@@ -1,6 +1,9 @@
 #include "gtest/gtest.h"
 #include "image.hh"
 
+using display::Colour;
+using display::Image;
+
 TEST(Colour, GetComponents)
 {
     auto c1 = Colour();

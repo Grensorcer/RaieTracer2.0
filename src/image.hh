@@ -2,93 +2,97 @@
 #include <iostream>
 #include <vector>
 
-class Colour
+namespace display
 {
-public:
-    Colour() = default;
-    Colour(const Colour &c) = default;
-    Colour(const uint8_t (&rgb)[3])
+    class Colour
     {
-        std::copy(rgb, rgb + 3, rgb_);
-    }
-    Colour(uint8_t r, uint8_t g, uint8_t b)
+    public:
+        Colour() = default;
+        Colour(const Colour &c) = default;
+        Colour(const uint8_t (&rgb)[3])
+        {
+            std::copy(rgb, rgb + 3, rgb_);
+        }
+        Colour(uint8_t r, uint8_t g, uint8_t b)
+        {
+            rgb_[0] = r;
+            rgb_[1] = g;
+            rgb_[2] = b;
+        }
+
+        const uint8_t &r() const
+        {
+            return rgb_[0];
+        }
+        const uint8_t &g() const
+        {
+            return rgb_[1];
+        }
+        const uint8_t &b() const
+        {
+            return rgb_[2];
+        }
+
+        bool operator==(const Colour &c) const
+        {
+            return this->r() == c.r() && this->g() == c.g()
+                && this->b() == c.b();
+        }
+        bool operator!=(const Colour &c) const
+        {
+            return !(*this == c);
+        }
+
+        friend std::ostream &operator<<(std::ostream &os, const Colour &c);
+
+    protected:
+        uint8_t rgb_[3] = {};
+    };
+
+    class Image
     {
-        rgb_[0] = r;
-        rgb_[1] = g;
-        rgb_[2] = b;
-    }
+    public:
+        using PixelTable = std::vector<Colour>;
+        Image() = delete;
+        Image(const Image &i) = default;
+        Image(size_t height, size_t width)
+            : width_{ width }
+            , height_{ height }
+        {
+            pixels_ = std::vector<Colour>(height * width);
+        }
 
-    const uint8_t &r() const
+        const Colour &get_pixel(size_t i, size_t j) const
+        {
+            return pixels_[j + i * width_];
+        }
+
+        void set_pixel(size_t i, size_t j, const Colour &c)
+        {
+            pixels_[j + i * width_] = c;
+        }
+
+        friend std::ostream &operator<<(std::ostream &os, const Image &i);
+
+    protected:
+        size_t width_;
+        size_t height_;
+        PixelTable pixels_;
+    };
+
+    std::ostream &operator<<(std::ostream &os, const Colour &c)
     {
-        return rgb_[0];
+        return os << +c.r() << ' ' << +c.g() << ' ' << +c.b();
     }
-    const uint8_t &g() const
+
+    std::ostream &operator<<(std::ostream &os, const Image &im)
     {
-        return rgb_[1];
+        os << "P3\n" << im.width_ << ' ' << im.height_ << "\n255\n";
+
+        for (size_t i = 0; i < im.height_; ++i)
+            for (size_t j = 0; j < im.width_; ++j)
+                os << im.get_pixel(i, j) << '\n';
+
+        return os;
     }
-    const uint8_t &b() const
-    {
-        return rgb_[2];
-    }
-
-    bool operator==(const Colour &c) const
-    {
-        return this->r() == c.r() && this->g() == c.g() && this->b() == c.b();
-    }
-    bool operator!=(const Colour &c) const
-    {
-        return !(*this == c);
-    }
-
-    friend std::ostream &operator<<(std::ostream &os, const Colour &c);
-
-protected:
-    uint8_t rgb_[3] = {};
-};
-
-class Image
-{
-public:
-    using PixelTable = std::vector<Colour>;
-    Image() = delete;
-    Image(const Image &i) = default;
-    Image(size_t height, size_t width)
-        : width_{ width }
-        , height_{ height }
-    {
-        pixels_ = std::vector<Colour>(height * width);
-    }
-
-    const Colour &get_pixel(size_t i, size_t j) const
-    {
-        return pixels_[j + i * width_];
-    }
-
-    void set_pixel(size_t i, size_t j, const Colour &c)
-    {
-        pixels_[j + i * width_] = c;
-    }
-
-    friend std::ostream &operator<<(std::ostream &os, const Image &i);
-
-protected:
-    size_t width_;
-    size_t height_;
-    PixelTable pixels_;
-};
-
-std::ostream &operator<<(std::ostream &os, const Colour &c)
-{
-    return os << +c.r() << ' ' << +c.g() << ' ' << +c.b();
-}
-
-std::ostream &operator<<(std::ostream &os, const Image &im)
-{
-    os << "P3\n" << im.width_ << ' ' << im.height_ << "\n255\n";
-
-    for (size_t i = 0; i < im.height_; ++i)
-        for (size_t j = 0; j < im.width_; ++j)
-            os << im.get_pixel(i, j) << '\n';
-
-    return os;
-}
+} // namespace display
