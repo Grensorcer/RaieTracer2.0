@@ -88,7 +88,7 @@ namespace structures
             return opposite;
         }
 
-        FixedMatrix<T, W, H> transpose()
+        FixedMatrix<T, W, H> transpose() const
         {
             FixedMatrix<T, W, H> transposed;
             for (size_t i = 0; i < W; ++i)
@@ -102,6 +102,14 @@ namespace structures
             for (size_t i = 0; i < H; ++i)
                 for (size_t j = 0; j < W; ++j)
                     this->at(i, j) *= rhs;
+            return *this;
+        }
+
+        FixedMatrix<T, H, W> &operator/=(const T &rhs)
+        {
+            for (size_t i = 0; i < H; ++i)
+                for (size_t j = 0; j < W; ++j)
+                    this->at(i, j) /= rhs;
             return *this;
         }
 
@@ -130,6 +138,10 @@ namespace structures
                         return false;
             return true;
         }
+        bool operator!=(const FixedMatrix<T, H, W> &m2) const
+        {
+            return !(*this == m2);
+        }
 
         FixedMatrix<T, H, W> operator+(FixedMatrix<T, H, W> m2) const
         {
@@ -146,6 +158,12 @@ namespace structures
         FixedMatrix<T, H, W> operator*(const T &rhs) const
         {
             return rhs * *this;
+        }
+
+        FixedMatrix<T, H, W> operator/(const T &rhs) const
+        {
+            auto copy = FixedMatrix<T, H, W>(*this);
+            return copy /= rhs;
         }
 
         template <const size_t K>
@@ -191,6 +209,18 @@ namespace structures
         return FixedMatrix<T, 1, 3>({ { lhs[2] * rhs[3] - lhs[3] * rhs[2],
                                         lhs[3] * rhs[1] - lhs[1] * rhs[3],
                                         lhs[1] * rhs[2] - lhs[2] * rhs[1] } });
+    }
+
+    template <typename T, const size_t W>
+    double norm(const FixedMatrix<T, 1, W> &v)
+    {
+        return sqrt((v * v.transpose())[0]);
+    }
+
+    template <typename T, const size_t W>
+    FixedMatrix<T, 1, W> unit(const FixedMatrix<T, 1, W> &v)
+    {
+        return v / norm(v);
     }
 
 } // namespace structures
