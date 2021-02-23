@@ -40,6 +40,8 @@ public:
         return !(*this == c);
     }
 
+    friend std::ostream &operator<<(std::ostream &os, const Colour &c);
+
 protected:
     uint8_t rgb_[3] = {};
 };
@@ -67,8 +69,26 @@ public:
         pixels_[j + i * width_] = c;
     }
 
+    friend std::ostream &operator<<(std::ostream &os, const Image &i);
+
 protected:
     size_t width_;
     size_t height_;
     PixelTable pixels_;
 };
+
+std::ostream &operator<<(std::ostream &os, const Colour &c)
+{
+    return os << +c.r() << ' ' << +c.g() << ' ' << +c.b();
+}
+
+std::ostream &operator<<(std::ostream &os, const Image &im)
+{
+    os << "P3\n" << im.width_ << ' ' << im.height_ << "\n255\n";
+
+    for (size_t i = 0; i < im.height_; ++i)
+        for (size_t j = 0; j < im.width_; ++j)
+            os << im.get_pixel(i, j) << '\n';
+
+    return os;
+}
