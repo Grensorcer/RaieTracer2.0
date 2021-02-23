@@ -19,3 +19,11 @@ TEST(Colour, GetComponents)
     ASSERT_EQ(20, c3.g());
     ASSERT_EQ(30, c3.b());
 }
+
+TEST(Image, EmptyImage)
+{
+    auto i = Image(10, 10);
+    ASSERT_EQ(Colour(), i.get_pixel(5, 5));
+    i.set_pixel(5, 5, Colour(20, 30, 40));
+    ASSERT_NE(Colour(), i.get_pixel(5, 5));
+}
