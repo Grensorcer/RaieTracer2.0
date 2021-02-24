@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 
 project(RaieTracer2.0 VERSION 0.1 LANGUAGES CXX)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # gtest
 # Download and unpack googletest at configure time
 configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
