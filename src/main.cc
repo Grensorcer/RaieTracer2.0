@@ -2,6 +2,7 @@
 
 #include "image.hh"
 #include "matrix.hh"
+#include "scene.hh"
 
 int main()
 {
