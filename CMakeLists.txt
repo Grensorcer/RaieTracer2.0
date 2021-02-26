@@ -38,11 +38,11 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
 endif()
 # end gtest
 
-add_executable(RaieTracer src/main.cc)
+add_executable(RaieTracer src/main.cc src/utils.cc)
 target_compile_features(RaieTracer PUBLIC cxx_std_17)
 target_compile_options(RaieTracer PUBLIC -Wall -Werror -Wextra -pedantic)
 target_include_directories(RaieTracer PUBLIC
                           "${PROJECT_SOURCE_DIR}/include")
 
-add_executable(Test src/test.cc src/test_vec3.cc src/test_image.cc)
+add_executable(Test src/test.cc src/test_vec3.cc src/test_image.cc src/utils.cc)
 target_link_libraries(Test gtest_main)
