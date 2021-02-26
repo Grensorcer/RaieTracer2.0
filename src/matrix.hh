@@ -4,10 +4,10 @@
 #include <iostream>
 #include <math.h>
 
+#include "utils.hh"
+
 namespace structures
 {
-    static constexpr double EPSILON = 0.001;
-
     template <typename T, const size_t H, const size_t W>
     class FixedMatrix;
 
@@ -134,7 +134,7 @@ namespace structures
             auto m1 = *this;
             for (size_t i = 0; i < H; ++i)
                 for (size_t j = 0; j < W; ++j)
-                    if (fabs(m1.at(i, j) - m2.at(i, j)) >= EPSILON)
+                    if (!(utils::almost_equal(m1.at(i, j), m2.at(i, j))))
                         return false;
             return true;
         }

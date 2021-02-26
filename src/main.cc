@@ -6,9 +6,19 @@
 
 int main()
 {
+    // Image
     auto file = std::ofstream("test.ppm");
-    size_t s = 300;
-    auto im = display::Image(s + 50, s);
+    const double aspect_ratio = 16. / 9.;
+    const size_t width = 400;
+    const size_t height = width / aspect_ratio;
+    auto im = display::Image(height, width);
+
+    // Camera
+    auto cam_origin = structures::Vec3({ { 0, 0, 0 } });
+    auto v_fov = 2.0;
+    auto h_fov = aspect_ratio * v_fov;
+    auto cam = environment::Camera(cam_origin, 1., v_fov, h_fov);
+
     for (size_t i = 0; i < s; ++i)
     {
         im.set_pixel(i, i, display::Colour(255, 255, 255));
