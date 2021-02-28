@@ -1,3 +1,6 @@
+#pragma once
+
+#include <algorithm>
 #include <cinttypes>
 #include <iostream>
 #include <vector>
@@ -41,6 +44,21 @@ namespace display
         bool operator!=(const Colour &c) const
         {
             return !(*this == c);
+        }
+
+        Colour &operator*=(double i)
+        {
+            rgb_[0] = std::clamp(static_cast<double>(rgb_[0]) * i, 0., 255.);
+            rgb_[1] = std::clamp(static_cast<double>(rgb_[1]) * i, 0., 255.);
+            rgb_[2] = std::clamp(static_cast<double>(rgb_[2]) * i, 0., 255.);
+            return *this;
+        }
+
+        Colour operator*(double i) const
+        {
+            auto cpy = *this;
+            cpy *= i;
+            return cpy;
         }
 
         friend std::ostream &operator<<(std::ostream &os, const Colour &c);

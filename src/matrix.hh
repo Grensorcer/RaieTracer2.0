@@ -19,13 +19,20 @@ namespace structures
     public:
         // Constructors
         FixedMatrix() = default;
-        FixedMatrix(const FixedMatrix<T, H, W> &m) = default;
+        FixedMatrix(const FixedMatrix<T, H, W> &m)
+        {
+            std::copy(m.m().begin(), m.m().end(), m_.begin());
+        };
         FixedMatrix(const T (&arr)[H][W])
         {
             for (size_t i = 0; i < H; ++i)
             {
                 std::copy(arr[i], arr[i] + W, m_.begin() + i * W);
             }
+        }
+        FixedMatrix<T, H, W> &operator=(const FixedMatrix<T, H, W> &m)
+        {
+            return FixedMatrix<T, H, W>(m);
         }
 
         static constexpr FixedMatrix<T, H, W> identity()
@@ -151,8 +158,9 @@ namespace structures
 
         FixedMatrix<T, H, W> operator-(FixedMatrix<T, H, W> m2) const
         {
-            m2 -= *this;
-            return m2;
+            auto cpy = *this;
+            cpy -= m2;
+            return cpy;
         }
 
         FixedMatrix<T, H, W> operator*(const T &rhs) const
@@ -206,9 +214,9 @@ namespace structures
     FixedMatrix<T, 1, 3> operator^(const FixedMatrix<T, 1, 3> &lhs,
                                    const FixedMatrix<T, 1, 3> &rhs)
     {
-        return FixedMatrix<T, 1, 3>({ { lhs[2] * rhs[3] - lhs[3] * rhs[2],
-                                        lhs[3] * rhs[1] - lhs[1] * rhs[3],
-                                        lhs[1] * rhs[2] - lhs[2] * rhs[1] } });
+        return FixedMatrix<T, 1, 3>({ { lhs[1] * rhs[2] - lhs[2] * rhs[1],
+                                        lhs[2] * rhs[0] - lhs[0] * rhs[2],
+                                        lhs[0] * rhs[1] - lhs[1] * rhs[0] } });
     }
 
     template <typename T, const size_t W>

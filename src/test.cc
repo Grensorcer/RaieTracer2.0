@@ -132,6 +132,14 @@ TEST(Matrix, Minus)
               m2);
 }
 
+TEST(Matrix, Diff)
+{
+    auto m1 = FixedMatrix<int, 3, 3>::arange();
+    auto m2 = FixedMatrix<int, 3, 3>::arange();
+    ASSERT_EQ((FixedMatrix<int, 3, 3>()), m1 - m2);
+    ASSERT_EQ((FixedMatrix<int, 3, 3>()), m2 - m1);
+}
+
 TEST(Matrix, Sub)
 {
     auto m1 = FixedMatrix<int, 3, 3>::arange();
