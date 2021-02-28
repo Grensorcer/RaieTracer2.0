@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.10)
 
 project(RaieTracer2.0 VERSION 0.1 LANGUAGES CXX)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 # gtest
 # Download and unpack googletest at configure time
 configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
@@ -45,4 +43,9 @@ target_include_directories(RaieTracer PUBLIC
                           "${PROJECT_SOURCE_DIR}/include")
 
 add_executable(Test src/test.cc src/test_vec3.cc src/test_image.cc src/utils.cc)
+target_compile_features(Test PUBLIC cxx_std_17)
+target_compile_options(Test PUBLIC -Wall -Werror -Wextra -pedantic)
 target_link_libraries(Test gtest_main)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
