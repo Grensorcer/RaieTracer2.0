@@ -81,23 +81,27 @@ namespace environment
             if (discriminant < 0)
                 return res;
 
-            res = std::make_optional<>(intersection_record{});
-            if (discriminant == 0)
-                res->t = -b / (2 * a);
+            double sol1 = (-b - sqrt(discriminant)) / (2 * a);
+            double sol2 = (-b + sqrt(discriminant)) / (2 * a);
+            double t;
+            structures::Vec3 p1 = r.at(sol1);
+            structures::Vec3 p2 = r.at(sol2);
+            // Distance between two points
+            if (sol1 < 0)
+                t = sol2;
+            else if (sol2 < 0)
+                t = sol1;
             else
-            {
-                double sol1 = (-b - sqrt(discriminant)) / (2 * a);
-                double sol2 = (-b + sqrt(discriminant)) / (2 * a);
-                structures::Vec3 p1 = r.at(sol1);
-                structures::Vec3 p2 = r.at(sol2);
-                // Distance between two points
-                res->t = sol2 >= 0
-                        && structures::norm(oc - p1) > structures::norm(oc - p2)
+                t = structures::norm(oc - p1) > structures::norm(oc - p2)
                     ? sol2
                     : sol1;
-            }
-            res->normal = normal(r.at(res->t));
-            res->comps = get_components(r.at(res->t));
+            if (t < 0)
+                return res;
+
+            res = std::make_optional<>(intersection_record{});
+            res->t = t;
+            res->normal = normal(r.at(t));
+            res->comps = get_components(r.at(t));
 
             return res;
         }

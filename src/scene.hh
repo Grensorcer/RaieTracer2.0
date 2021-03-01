@@ -57,9 +57,7 @@ namespace environment
                 std::optional<environment::intersection_record>(std::nullopt),
                 [](auto &l_ir, auto &r_ir) {
                     auto res = l_ir;
-                    if (!l_ir || l_ir->t < 0
-                        || (r_ir.has_value() && r_ir->t >= 0
-                            && r_ir->t < l_ir->t))
+                    if (!l_ir || (r_ir && r_ir->t < l_ir->t))
                         res = r_ir;
                     return res;
                 });
@@ -81,7 +79,7 @@ namespace environment
                     Ray(intersection_point + light_dir * 0.05, light_dir);
                 auto light_intersection = find_closest_intersection(light_ray);
                 if ((i_r.normal * light_dir.transpose())[0] < 0
-                    || (light_intersection && light_intersection->t > 0
+                    || (light_intersection
                         && structures::norm(light_ray.at(light_intersection->t)
                                             - light_ray.origin())
                             < light_distance))
@@ -112,7 +110,7 @@ namespace environment
             auto oi_r = find_closest_intersection(r);
             auto colour = display::Colour();
 
-            if (oi_r && oi_r->t > 0)
+            if (oi_r)
                 colour = compute_light_input(r, oi_r.value());
             else
                 colour = display::Colour(0.6, 0.6, 1.) * ambiant_light_;

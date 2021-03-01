@@ -49,7 +49,7 @@ int main()
     // lights.emplace_back(
     //   new environment::Point_Light(structures::Vec3({ { 3, -6, 0 } }), 1.));
 
-    auto scene = environment::Scene(cam, objects, lights, 0.5);
+    auto scene = environment::Scene(cam, objects, lights, 0.3);
 
     for (size_t i = 0; i < height; ++i)
         for (size_t j = 0; j < width; ++j)
