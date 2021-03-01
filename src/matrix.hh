@@ -12,7 +12,6 @@ namespace structures
     class FixedMatrix;
 
     typedef FixedMatrix<double, 1, 3> Vec3;
-
     template <typename T, const size_t H, const size_t W>
     class FixedMatrix
     {
