@@ -41,6 +41,30 @@ namespace environment
             , ambiant_light_{ ambiant_light }
         {}
 
+        std::optional<environment::intersection_record>
+        find_closest_intersection(const Ray &r)
+        {
+            auto intersection_records =
+                std::vector<std::optional<environment::intersection_record>>();
+
+            std::transform(
+                objects_.begin(), objects_.end(),
+                std::back_inserter(intersection_records),
+                [r](const auto &object) { return object->intersection(r); });
+
+            return std::reduce(
+                intersection_records.begin(), intersection_records.end(),
+                std::optional<environment::intersection_record>(std::nullopt),
+                [](auto &l_ir, auto &r_ir) {
+                    auto res = l_ir;
+                    if (!l_ir || l_ir.value().t < 0
+                        || (r_ir.has_value() && r_ir.value().t >= 0
+                            && r_ir.value().t < l_ir.value().t))
+                        res = r_ir;
+                    return res;
+                });
+        }
+
         display::Colour cast_ray(const Ray &r)
         {
             // Gradient
@@ -52,25 +76,7 @@ namespace environment
 
             // Intersections
             //
-            auto intersection_records =
-                std::vector<std::optional<environment::intersection_record>>();
-
-            std::transform(
-                objects_.begin(), objects_.end(),
-                std::back_inserter(intersection_records),
-                [r](const auto &object) { return object->intersection(r); });
-
-            auto oi_r = std::reduce(
-                intersection_records.begin(), intersection_records.end(),
-                std::optional<environment::intersection_record>(std::nullopt),
-                [](auto &l_ir, auto &r_ir) {
-                    auto res = l_ir;
-                    if (!l_ir || l_ir.value().t < 0
-                        || (r_ir.has_value() && r_ir.value().t >= 0
-                            && r_ir.value().t < l_ir.value().t))
-                        res = r_ir;
-                    return res;
-                });
+            auto oi_r = find_closest_intersection(r);
 
             if (oi_r && oi_r.value().t > 0)
             {
