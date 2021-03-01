@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <memory>
 #include <optional>
 #include <tuple>
@@ -66,7 +67,6 @@ namespace environment
                 * structures::Vec3(
                       { { cos(i) * cos(j), cos(i) * sin(j), sin(j) } });
         }
-
         std::optional<intersection_record>
         intersection(const Ray &r) const override
         {
@@ -83,7 +83,7 @@ namespace environment
 
             res = std::make_optional<>(intersection_record{});
             if (discriminant == 0)
-                res.value().t = -b / (2 * a);
+                res->t = -b / (2 * a);
             else
             {
                 double sol1 = (-b - sqrt(discriminant)) / (2 * a);
@@ -91,14 +91,13 @@ namespace environment
                 structures::Vec3 p1 = r.at(sol1);
                 structures::Vec3 p2 = r.at(sol2);
                 // Distance between two points
-                res.value().t =
-                    structures::norm(oc - p1) > structures::norm(oc - p2)
-                        && structures::norm(oc - p2) >= 0
+                res->t = sol2 >= 0
+                        && structures::norm(oc - p1) > structures::norm(oc - p2)
                     ? sol2
                     : sol1;
             }
-            res.value().normal = normal(r.at(res.value().t));
-            res.value().comps = get_components(r.at(res.value().t));
+            res->normal = normal(r.at(res->t));
+            res->comps = get_components(r.at(res->t));
 
             return res;
         }

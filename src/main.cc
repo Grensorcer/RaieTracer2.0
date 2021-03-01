@@ -28,7 +28,7 @@ int main()
     std::vector<std::shared_ptr<environment::Light>> lights;
     objects.emplace_back(
         std::make_shared<environment::Sphere>(environment::Sphere(
-            structures::Vec3({ { 0, -2, 0 } }),
+            structures::Vec3({ { -1, -2, 0 } }),
             new environment::Uniform_Texture(display::Colour(0.25, 0.25, 0.25),
                                              0.8, 0.4, 0.4),
             0.5)));
@@ -38,18 +38,18 @@ int main()
                                 display::Colour(0, 0.33, 0.1), 0.9, 0.8, 0.2),
                             100.)));
     objects.emplace_back(std::make_shared<environment::Sphere>(
-        environment::Sphere(structures::Vec3({ { 1, -1, 0 } }),
+        environment::Sphere(structures::Vec3({ { 1, -2, 0 } }),
                             new environment::Uniform_Texture(
                                 display::Colour(0.8, 0.3, 0.5), 0.8, 0.4, 0.4),
                             0.5)));
     // lights.emplace_back(new environment::Point_Light(
     //    structures::Vec3({ { 0.5, -1.5, 0 } }), 1.));
     lights.emplace_back(std::make_shared<environment::Point_Light>(
-        environment::Point_Light(structures::Vec3({ { 0, -1, 2 } }), 2.)));
+        environment::Point_Light(structures::Vec3({ { 0, -1.5, 1 } }), 2.)));
     // lights.emplace_back(
     //   new environment::Point_Light(structures::Vec3({ { 3, -6, 0 } }), 1.));
 
-    auto scene = environment::Scene(cam, objects, lights, 0.3);
+    auto scene = environment::Scene(cam, objects, lights, 0.5);
 
     for (size_t i = 0; i < height; ++i)
         for (size_t j = 0; j < width; ++j)
