@@ -25,13 +25,12 @@ namespace structures
         FixedMatrix(const T (&arr)[H][W])
         {
             for (size_t i = 0; i < H; ++i)
-            {
                 std::copy(arr[i], arr[i] + W, m_.begin() + i * W);
-            }
         }
         FixedMatrix<T, H, W> &operator=(const FixedMatrix<T, H, W> &m)
         {
-            return FixedMatrix<T, H, W>(m);
+            std::copy(m.m().begin(), m.m().end(), m_.begin());
+            return *this;
         }
 
         static constexpr FixedMatrix<T, H, W> identity()
