@@ -54,6 +54,14 @@ namespace display
             return *this;
         }
 
+        Colour &operator*=(const Colour &rhs)
+        {
+            rgb_[0] *= rhs.r();
+            rgb_[1] *= rhs.g();
+            rgb_[2] *= rhs.b();
+            return *this;
+        }
+
         Colour &operator*=(double i)
         {
             rgb_[0] *= i;
@@ -87,6 +95,13 @@ namespace display
         {
             auto cpy = *this;
             cpy += c;
+            return cpy;
+        }
+
+        Colour operator*(const Colour &c) const
+        {
+            auto cpy = *this;
+            cpy *= c;
             return cpy;
         }
 

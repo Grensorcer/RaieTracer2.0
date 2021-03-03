@@ -34,11 +34,13 @@ namespace environment
             , lights_{ lights }
         {}
         Scene(Camera &cam, std::vector<std::shared_ptr<Object>> &objects,
-              std::vector<std::shared_ptr<Light>> &lights, double ambiant_light)
+              std::vector<std::shared_ptr<Light>> &lights, double ambiant_light,
+              double sky_light)
             : cam_{ cam }
             , objects_{ objects }
             , lights_{ lights }
             , ambiant_light_{ ambiant_light }
+            , sky_light_{ sky_light }
         {}
 
         std::optional<environment::intersection_record>
@@ -64,9 +66,13 @@ namespace environment
         }
 
         display::Colour compute_light_input(const Ray &r,
-                                            const intersection_record &i_r)
+                                            const intersection_record &i_r,
+                                            int depth)
         {
             auto intersection_point = r.at(i_r.t);
+            auto s = intersection_point
+                - i_r.normal * 2
+                    * (intersection_point * i_r.normal.transpose())[0];
             double diff = 0.;
             double spec = 0.;
             for (const auto &light : lights_)
@@ -90,30 +96,39 @@ namespace environment
                     / structures::norm(light->center() - intersection_point);
 
                 // Specularity
-                auto s = intersection_point
-                    - i_r.normal * 2
-                        * (intersection_point * i_r.normal.transpose())[0];
-                spec += pow(fabs((s * light_dir.transpose())[0]),
-                            std::get<3>(i_r.comps))
+                auto s_sp = (s * light_dir.transpose())[0];
+                spec += pow(s_sp >= 0 ? s_sp : 0, std::get<3>(i_r.comps))
                     * light->intensity()
                     / structures::norm(light->center() - intersection_point);
             }
 
             return std::get<0>(i_r.comps)
-                * ((std::get<1>(i_r.comps) * diff)
-                   + std::get<2>(i_r.comps) * spec + ambiant_light_);
+                * (std::get<1>(i_r.comps) * diff
+                   + std::get<2>(i_r.comps) * spec)
+                + std::get<0>(i_r.comps)
+                * cast_ray(Ray(intersection_point + s * 0.05, s), depth - 1);
         }
 
-        display::Colour cast_ray(const Ray &r)
+        display::Colour compute_sky(const Ray &r)
         {
-            // Intersections
-            auto oi_r = find_closest_intersection(r);
-            auto colour = display::Colour();
+            auto gradient = 0.5 * (r.direction()[2] + 1.);
+            return (display::Colour(1., 1., 1.) * (1. - gradient)
+                    + display::Colour(0.5, 0.7, 1.) * gradient)
+                * sky_light_;
+        }
 
-            if (oi_r)
-                colour = compute_light_input(r, oi_r.value());
-            else
-                colour = display::Colour(0.6, 0.6, 1.) * ambiant_light_;
+        display::Colour cast_ray(const Ray &r, int depth)
+        {
+            auto colour = display::Colour();
+            if (depth >= 0)
+            {
+                auto oi_r = find_closest_intersection(r);
+                if (oi_r)
+                    colour = compute_light_input(r, oi_r.value(), depth)
+                        * ambiant_light_;
+                else
+                    colour = compute_sky(r);
+            }
             return colour;
         }
 
@@ -121,7 +136,8 @@ namespace environment
         Camera cam_;
         std::vector<std::shared_ptr<Object>> objects_;
         std::vector<std::shared_ptr<Light>> lights_;
-        double ambiant_light_;
+        double ambiant_light_ = 1.;
+        double sky_light_ = 1.;
     };
 
 } // namespace environment
