@@ -24,12 +24,11 @@ namespace environment
             });
     }
 
-    display::Colour Scene::compute_light_input(const Ray &r,
+    display::Colour Scene::compute_light_input(const Vec3 &intersection_point,
                                                const intersection_record &i_r,
                                                int depth)
     {
-        auto intersection_point = r.at(i_r.t);
-        auto s = intersection_point
+        auto reflexion = intersection_point
             - i_r.normal * 2 * (intersection_point * i_r.normal.transpose())[0];
         double diff = 0.;
         double spec = 0.;
@@ -53,16 +52,18 @@ namespace environment
                 / structures::norm(light->center() - intersection_point);
 
             // Specularity
-            auto s_sp = (s * light_dir.transpose())[0];
+            auto s_sp = (reflexion * light_dir.transpose())[0];
             spec += pow(s_sp >= 0 ? s_sp : 0, std::get<3>(i_r.comps))
                 * light->intensity()
                 / structures::norm(light->center() - intersection_point);
         }
 
         return std::get<0>(i_r.comps)
-            * (std::get<1>(i_r.comps) * diff + std::get<2>(i_r.comps) * spec)
+            * (std::get<1>(i_r.comps) * diff + std::get<2>(i_r.comps) * spec
+               + ambiant_light_)
             + std::get<0>(i_r.comps)
-            * cast_ray(Ray(intersection_point + s * 0.05, s), depth - 1);
+            * cast_ray(Ray(intersection_point + reflexion * 0.05, reflexion),
+                       depth - 1);
     }
 
     display::Colour Scene::compute_sky(const Ray &r)
@@ -70,7 +71,7 @@ namespace environment
         auto gradient = 0.5 * (r.direction()[2] + 1.);
         return (display::Colour(1., 1., 1.) * (1. - gradient)
                 + display::Colour(0.5, 0.7, 1.) * gradient)
-            * sky_light_;
+            * ambiant_light_;
     }
 
     display::Colour Scene::cast_ray(const Ray &r, int depth)
@@ -80,8 +81,11 @@ namespace environment
         {
             auto oi_r = find_closest_intersection(r);
             if (oi_r)
-                colour = compute_light_input(r, oi_r.value(), depth)
-                    * ambiant_light_;
+            {
+                auto intersection_point = r.at(oi_r->t);
+                colour = compute_light_input(intersection_point, oi_r.value(),
+                                             depth);
+            }
             else
                 colour = compute_sky(r);
         }

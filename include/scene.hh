@@ -34,19 +34,17 @@ namespace environment
             , lights_{ lights }
         {}
         Scene(Camera &cam, std::vector<std::shared_ptr<Object>> &objects,
-              std::vector<std::shared_ptr<Light>> &lights, double ambiant_light,
-              double sky_light)
+              std::vector<std::shared_ptr<Light>> &lights, double ambiant_light)
             : cam_{ cam }
             , objects_{ objects }
             , lights_{ lights }
             , ambiant_light_{ ambiant_light }
-            , sky_light_{ sky_light }
         {}
 
         std::optional<environment::intersection_record>
         find_closest_intersection(const Ray &r);
 
-        display::Colour compute_light_input(const Ray &r,
+        display::Colour compute_light_input(const Vec3 &intersection_point,
                                             const intersection_record &i_r,
                                             int depth);
 
@@ -59,7 +57,6 @@ namespace environment
         std::vector<std::shared_ptr<Object>> objects_;
         std::vector<std::shared_ptr<Light>> lights_;
         double ambiant_light_ = 1.;
-        double sky_light_ = 1.;
     };
 
 } // namespace environment

@@ -39,8 +39,8 @@ int main()
         0.5));
     objects.emplace_back(std::make_shared<environment::Sphere>(
         structures::Vec3({ { 1, -2, 1 } }),
-        new environment::Uniform_Texture(display::Colour(1., 1., 1.), 1., 0.,
-                                         0.),
+        new environment::Uniform_Texture(display::Colour(1., 1., 1.), 0., 1.,
+                                         1.),
         0.5));
     objects.emplace_back(std::make_shared<environment::Sphere>(
         structures::Vec3({ { 1, -2, -1 } }),
@@ -58,9 +58,9 @@ int main()
                                          0.),
         100.));
     lights.emplace_back(std::make_shared<environment::Point_Light>(
-        structures::Vec3({ { 2, -1.5, 2 } }), 1.));
+        structures::Vec3({ { 0, -1.5, 2 } }), 1.));
 
-    auto scene = environment::Scene(cam, objects, lights);
+    auto scene = environment::Scene(cam, objects, lights, 0.5);
 
     for (size_t i = 0; i < height; ++i)
     {
