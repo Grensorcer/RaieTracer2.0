@@ -12,7 +12,7 @@ TEST(Vec3, ScalarProduct)
 {
     auto v1 = Vec3::arange();
     auto v2 = Vec3::arange();
-    auto res = FixedMatrix<double, 1, 1>({ { 5 } });
+    auto res = FixedMatrix<1, 1>({ { 5 } });
     auto res2 = v1 * v2.transpose();
     ASSERT_EQ(res, res2);
 }

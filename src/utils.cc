@@ -20,16 +20,16 @@ namespace utils
         return min + random_double() * (max - min);
     }
 
-    //    structures::Vec3 random_vec3()
-    //    {
-    //        return structures::Vec3(
-    //            { { random_double(), random_double(), random_double() } });
-    //    }
+    structures::Vec3 random_vec3()
+    {
+        return structures::Vec3(
+            { { random_double(), random_double(), random_double() } });
+    }
 
-    //    structures::Vec3 random_vec3(double min, double max)
-    //    {
-    //        return structures::Vec3(
-    //            { { random_double(min, max), random_double(min, max),
-    //                random_double(min, max) } });
-    //    }
+    structures::Vec3 random_vec3(double min, double max)
+    {
+        return structures::Vec3(
+            { { random_double(min, max), random_double(min, max),
+                random_double(min, max) } });
+    }
 } // namespace utils

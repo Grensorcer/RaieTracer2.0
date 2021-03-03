@@ -4,48 +4,46 @@
 #include <iostream>
 #include <math.h>
 
-#include "utils.hh"
+namespace utils
+{
+    bool almost_equal(double a, double b);
+}
 
 namespace structures
 {
-    template <typename T, size_t H, size_t W>
-    class FixedMatrix;
-
-    typedef FixedMatrix<double, 1, 3> Vec3;
-
-    template <typename T, size_t H, size_t W>
+    template <size_t H, size_t W>
     class FixedMatrix
     {
     public:
         // Constructors
         FixedMatrix() = default;
-        FixedMatrix(const FixedMatrix<T, H, W> &m)
+        FixedMatrix(const FixedMatrix<H, W> &m)
         {
             std::copy(m.m().begin(), m.m().end(), m_.begin());
         };
-        FixedMatrix(const T (&arr)[H][W])
+        FixedMatrix(const double (&arr)[H][W])
         {
             for (size_t i = 0; i < H; ++i)
                 std::copy(arr[i], arr[i] + W, m_.begin() + i * W);
         }
-        FixedMatrix<T, H, W> &operator=(const FixedMatrix<T, H, W> &m)
+        FixedMatrix<H, W> &operator=(const FixedMatrix<H, W> &m)
         {
             std::copy(m.m().begin(), m.m().end(), m_.begin());
             return *this;
         }
 
-        static constexpr FixedMatrix<T, H, W> identity()
+        static constexpr FixedMatrix<H, W> identity()
         {
-            FixedMatrix<T, H, W> res;
+            FixedMatrix<H, W> res;
             for (size_t i = 0; i < H; ++i)
                 for (size_t j = 0; j < W; ++j)
                     res.at(i, j) = i == j ? 1 : 0;
             return res;
         }
 
-        static constexpr FixedMatrix<T, H, W> arange()
+        static constexpr FixedMatrix<H, W> arange()
         {
-            FixedMatrix<T, H, W> res;
+            FixedMatrix<H, W> res;
             for (size_t i = 0; i < H; ++i)
                 for (size_t j = 0; j < W; ++j)
                     res.at(i, j) = j + i * W;
@@ -53,7 +51,7 @@ namespace structures
         }
 
         // Getters
-        const std::array<T, (H * W)> &m() const
+        const std::array<double, (H * W)> &m() const
         {
             return m_;
         }
@@ -67,43 +65,43 @@ namespace structures
         }
 
         // Content Access
-        const T &operator[](size_t i) const
+        const double &operator[](size_t i) const
         {
             return m_[i];
         }
-        T &operator[](size_t i)
+        double &operator[](size_t i)
         {
             return m_[i];
         }
-        const T &at(size_t i, size_t j) const
+        const double &at(size_t i, size_t j) const
         {
             return m_[j + i * W];
         }
-        T &at(size_t i, size_t j)
+        double &at(size_t i, size_t j)
         {
             return m_[j + i * W];
         }
 
         // Matrix operation
-        FixedMatrix<T, H, W> operator-() const
+        FixedMatrix<H, W> operator-() const
         {
-            FixedMatrix<T, W, H> opposite;
+            FixedMatrix<W, H> opposite;
             for (size_t i = 0; i < H; ++i)
                 for (size_t j = 0; j < W; ++j)
                     opposite.at(i, j) = -(this->at(i, j));
             return opposite;
         }
 
-        FixedMatrix<T, W, H> transpose() const
+        FixedMatrix<W, H> transpose() const
         {
-            FixedMatrix<T, W, H> transposed;
+            FixedMatrix<W, H> transposed;
             for (size_t i = 0; i < W; ++i)
                 for (size_t j = 0; j < H; ++j)
                     transposed.at(i, j) = this->at(j, i);
             return transposed;
         }
 
-        FixedMatrix<T, H, W> &operator*=(const T &rhs)
+        FixedMatrix<H, W> &operator*=(const double &rhs)
         {
             for (size_t i = 0; i < H; ++i)
                 for (size_t j = 0; j < W; ++j)
@@ -111,7 +109,7 @@ namespace structures
             return *this;
         }
 
-        FixedMatrix<T, H, W> &operator/=(const T &rhs)
+        FixedMatrix<H, W> &operator/=(const double &rhs)
         {
             for (size_t i = 0; i < H; ++i)
                 for (size_t j = 0; j < W; ++j)
@@ -120,14 +118,14 @@ namespace structures
         }
 
         // Operations between matrices
-        FixedMatrix<T, H, W> &operator+=(const FixedMatrix<T, H, W> &rhs)
+        FixedMatrix<H, W> &operator+=(const FixedMatrix<H, W> &rhs)
         {
             for (size_t i = 0; i < H; ++i)
                 for (size_t j = 0; j < W; ++j)
                     this->at(i, j) += rhs.at(i, j);
             return *this;
         }
-        FixedMatrix<T, H, W> &operator-=(const FixedMatrix<T, H, W> &rhs)
+        FixedMatrix<H, W> &operator-=(const FixedMatrix<H, W> &rhs)
         {
             for (size_t i = 0; i < H; ++i)
                 for (size_t j = 0; j < W; ++j)
@@ -135,7 +133,7 @@ namespace structures
             return *this;
         }
 
-        bool operator==(const FixedMatrix<T, H, W> &m2) const
+        bool operator==(const FixedMatrix<H, W> &m2) const
         {
             auto m1 = *this;
             for (size_t i = 0; i < H; ++i)
@@ -144,39 +142,39 @@ namespace structures
                         return false;
             return true;
         }
-        bool operator!=(const FixedMatrix<T, H, W> &m2) const
+        bool operator!=(const FixedMatrix<H, W> &m2) const
         {
             return !(*this == m2);
         }
 
-        FixedMatrix<T, H, W> operator+(FixedMatrix<T, H, W> m2) const
+        FixedMatrix<H, W> operator+(FixedMatrix<H, W> m2) const
         {
             m2 += *this;
             return m2;
         }
 
-        FixedMatrix<T, H, W> operator-(FixedMatrix<T, H, W> m2) const
+        FixedMatrix<H, W> operator-(FixedMatrix<H, W> m2) const
         {
             auto cpy = *this;
             cpy -= m2;
             return cpy;
         }
 
-        FixedMatrix<T, H, W> operator*(const T &rhs) const
+        FixedMatrix<H, W> operator*(const double &rhs) const
         {
             return rhs * *this;
         }
 
-        FixedMatrix<T, H, W> operator/(const T &rhs) const
+        FixedMatrix<H, W> operator/(const double &rhs) const
         {
-            auto copy = FixedMatrix<T, H, W>(*this);
+            auto copy = FixedMatrix<H, W>(*this);
             return copy /= rhs;
         }
 
         template <size_t K>
-        FixedMatrix<T, H, K> operator*(const FixedMatrix<T, W, K> &rhs) const
+        FixedMatrix<H, K> operator*(const FixedMatrix<W, K> &rhs) const
         {
-            FixedMatrix<T, H, K> res;
+            FixedMatrix<H, K> res;
             for (size_t i = 0; i < H; ++i)
                 for (size_t k = 0; k < K; ++k)
                     for (size_t j = 0; j < W; ++j)
@@ -184,14 +182,20 @@ namespace structures
             return res;
         }
 
+        friend FixedMatrix<1ul, 3ul>
+        operator^(const FixedMatrix<1ul, 3ul> &lhs,
+                  const FixedMatrix<1ul, 3ul> &rhs);
+
     protected:
         const size_t width_ = W;
         const size_t height_ = H;
-        std::array<T, (H * W)> m_ = {};
+        std::array<double, (H * W)> m_ = {};
     };
 
-    template <typename T, size_t H, size_t W>
-    std::ostream &operator<<(std::ostream &os, const FixedMatrix<T, H, W> &m)
+    using Vec3 = FixedMatrix<1ul, 3ul>;
+
+    template <size_t H, size_t W>
+    std::ostream &operator<<(std::ostream &os, const FixedMatrix<H, W> &m)
     {
         for (size_t i = 0; i < H; ++i)
         {
@@ -202,30 +206,24 @@ namespace structures
         return os;
     }
 
-    template <typename T, size_t H, size_t W>
-    FixedMatrix<T, H, W> operator*(const T &lhs, FixedMatrix<T, H, W> rhs)
+    template <size_t H, size_t W>
+    FixedMatrix<H, W> operator*(const double &lhs, FixedMatrix<H, W> rhs)
     {
         rhs *= lhs;
         return rhs;
     }
 
-    template <typename T>
-    FixedMatrix<T, 1, 3> operator^(const FixedMatrix<T, 1, 3> &lhs,
-                                   const FixedMatrix<T, 1, 3> &rhs)
-    {
-        return FixedMatrix<T, 1, 3>({ { lhs[1] * rhs[2] - lhs[2] * rhs[1],
-                                        lhs[2] * rhs[0] - lhs[0] * rhs[2],
-                                        lhs[0] * rhs[1] - lhs[1] * rhs[0] } });
-    }
+    FixedMatrix<1ul, 3ul> operator^(const FixedMatrix<1ul, 3ul> &lhs,
+                                    const FixedMatrix<1ul, 3ul> &rhs);
 
-    template <typename T, size_t W>
-    double norm(const FixedMatrix<T, 1, W> &v)
+    template <size_t W>
+    double norm(const FixedMatrix<1, W> &v)
     {
         return sqrt((v * v.transpose())[0]);
     }
 
-    template <typename T, size_t W>
-    FixedMatrix<T, 1, W> unit(const FixedMatrix<T, 1, W> &v)
+    template <size_t W>
+    FixedMatrix<1, W> unit(const FixedMatrix<1, W> &v)
     {
         return v / norm(v);
     }

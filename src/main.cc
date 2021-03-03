@@ -4,6 +4,7 @@
 #include "image.hh"
 #include "matrix.hh"
 #include "scene.hh"
+#include "utils.hh"
 
 int main()
 {
