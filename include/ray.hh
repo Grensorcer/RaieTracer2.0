@@ -14,10 +14,7 @@ namespace environment
             , direction_{ direction }
         {}
 
-        structures::Vec3 at(double t) const
-        {
-            return t * direction_ + origin_;
-        }
+        structures::Vec3 at(double t) const;
 
         const structures::Vec3 &origin() const
         {

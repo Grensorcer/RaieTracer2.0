@@ -26,12 +26,11 @@ int main()
     // Objects and Lights
     std::vector<std::shared_ptr<environment::Object>> objects;
     std::vector<std::shared_ptr<environment::Light>> lights;
-    objects.emplace_back(
-        std::make_shared<environment::Sphere>(environment::Sphere(
-            structures::Vec3({ { -1, -2, -1 } }),
-            new environment::Uniform_Texture(display::Colour(0.25, 0.25, 0.25),
-                                             0.8, 0.4, 0.4),
-            0.5)));
+    objects.emplace_back(std::make_shared<environment::Sphere>(
+        structures::Vec3({ { -1, -2, -1 } }),
+        new environment::Uniform_Texture(display::Colour(0.25, 0.25, 0.25), 0.8,
+                                         0.4, 0.4),
+        0.5));
     objects.emplace_back(std::make_shared<environment::Sphere>(
         structures::Vec3({ { -1, -2, 1 } }),
         new environment::Uniform_Texture(display::Colour(0., 0., 1.), 0.8, 0.4,

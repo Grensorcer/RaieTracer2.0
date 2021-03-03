@@ -36,16 +36,20 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
 endif()
 # end gtest
 
-add_executable(RaieTracer src/main.cc src/utils.cc)
+set(SRC src/texture.cc src/camera.cc src/image.cc src/light.cc src/object.cc src/ray.cc src/scene.cc src/utils.cc)
+
+add_executable(RaieTracer src/main.cc ${SRC})
 target_compile_features(RaieTracer PUBLIC cxx_std_17)
 target_compile_options(RaieTracer PUBLIC -Wall -Werror -Wextra -pedantic)
 target_include_directories(RaieTracer PUBLIC
                           "${PROJECT_SOURCE_DIR}/include")
 
-add_executable(Test src/test.cc src/test_vec3.cc src/test_image.cc src/utils.cc)
+add_executable(Test src/test.cc src/test_vec3.cc src/test_image.cc ${SRC})
 target_compile_features(Test PUBLIC cxx_std_17)
 target_compile_options(Test PUBLIC -Wall -Werror -Wextra -pedantic)
 target_link_libraries(Test gtest_main)
+target_include_directories(Test PUBLIC
+                          "${PROJECT_SOURCE_DIR}/include")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 

@@ -27,11 +27,7 @@ namespace environment
         {}
 
         const std::tuple<display::Colour, double, double, double>
-        get_components(const structures::Vec3 &p) const override
-        {
-            (void)p;
-            return std::make_tuple<>(c_, kd_, ks_, ns_);
-        }
+        get_components(const structures::Vec3 &p) const override;
 
     protected:
         display::Colour c_;

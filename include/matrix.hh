@@ -8,12 +8,12 @@
 
 namespace structures
 {
-    template <typename T, const size_t H, const size_t W>
+    template <typename T, size_t H, size_t W>
     class FixedMatrix;
 
     typedef FixedMatrix<double, 1, 3> Vec3;
 
-    template <typename T, const size_t H, const size_t W>
+    template <typename T, size_t H, size_t W>
     class FixedMatrix
     {
     public:
@@ -173,7 +173,7 @@ namespace structures
             return copy /= rhs;
         }
 
-        template <const size_t K>
+        template <size_t K>
         FixedMatrix<T, H, K> operator*(const FixedMatrix<T, W, K> &rhs) const
         {
             FixedMatrix<T, H, K> res;
@@ -190,7 +190,7 @@ namespace structures
         std::array<T, (H * W)> m_ = {};
     };
 
-    template <typename T, const size_t H, const size_t W>
+    template <typename T, size_t H, size_t W>
     std::ostream &operator<<(std::ostream &os, const FixedMatrix<T, H, W> &m)
     {
         for (size_t i = 0; i < H; ++i)
@@ -202,7 +202,7 @@ namespace structures
         return os;
     }
 
-    template <typename T, const size_t H, const size_t W>
+    template <typename T, size_t H, size_t W>
     FixedMatrix<T, H, W> operator*(const T &lhs, FixedMatrix<T, H, W> rhs)
     {
         rhs *= lhs;
@@ -218,13 +218,13 @@ namespace structures
                                         lhs[0] * rhs[1] - lhs[1] * rhs[0] } });
     }
 
-    template <typename T, const size_t W>
+    template <typename T, size_t W>
     double norm(const FixedMatrix<T, 1, W> &v)
     {
         return sqrt((v * v.transpose())[0]);
     }
 
-    template <typename T, const size_t W>
+    template <typename T, size_t W>
     FixedMatrix<T, 1, W> unit(const FixedMatrix<T, 1, W> &v)
     {
         return v / norm(v);
