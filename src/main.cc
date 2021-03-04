@@ -1,3 +1,4 @@
+#include <chrono>
 #include <fstream>
 #include <memory>
 
@@ -8,13 +9,14 @@
 
 int main()
 {
+    auto start = std::chrono::high_resolution_clock::now();
     // Image
     auto file = std::ofstream("test.ppm");
     const double aspect_ratio = 16. / 9.;
-    const size_t width = 900;
+    const size_t width = 1920;
     const size_t height = width / aspect_ratio;
     auto im = display::Image(height, width);
-    size_t sample_per_pixel = 5;
+    size_t sample_per_pixel = 4;
 
     // Camera
     auto cam_origin = structures::Vec3({ { 0, 0.5, 0 } });
@@ -82,6 +84,10 @@ int main()
             im.set_pixel(i, j, color / sample_per_pixel);
         }
     }
+
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto time = std::chrono::duration_cast<std::chrono::seconds>(stop - start);
+    std::cout << "Time taken: " << time.count() << " seconds" << '\n';
 
     file << im;
     return 0;

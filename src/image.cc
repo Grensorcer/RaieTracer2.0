@@ -1,10 +1,22 @@
 #include "image.hh"
 
+#include "utils.hh"
+
 namespace display
 {
+    Colour &Colour::operator=(const Colour &c)
+    {
+        rgb_[0] = c.r();
+        rgb_[1] = c.g();
+        rgb_[2] = c.b();
+        return *this;
+    }
+
     bool Colour::operator==(const Colour &c) const
     {
-        return this->r() == c.r() && this->g() == c.g() && this->b() == c.b();
+        return utils::almost_equal(this->r(), c.r())
+            && utils::almost_equal(this->g(), c.g())
+            && utils::almost_equal(this->b(), c.b());
     }
     bool Colour::operator!=(const Colour &c) const
     {

@@ -42,15 +42,15 @@ namespace environment
         {}
 
         std::optional<environment::intersection_record>
-        find_closest_intersection(const Ray &r);
+        find_closest_intersection(const Ray &r) const;
 
         display::Colour compute_light_input(const Vec3 &intersection_point,
                                             const intersection_record &i_r,
-                                            int depth);
+                                            int depth) const;
 
-        display::Colour compute_sky(const Ray &r);
+        display::Colour compute_sky(const Ray &r) const;
 
-        display::Colour cast_ray(const Ray &r, int depth);
+        display::Colour cast_ray(const Ray &r, int depth) const;
 
     private:
         Camera cam_;

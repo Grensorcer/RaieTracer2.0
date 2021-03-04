@@ -4,7 +4,7 @@
 
 namespace utils
 {
-    static constexpr double EPSILON = 0.001;
+    static constexpr double EPSILON = 0.000001;
     bool almost_equal(double a, double b)
     {
         return fabs(a - b) < EPSILON;
@@ -20,16 +20,4 @@ namespace utils
         return min + random_double() * (max - min);
     }
 
-    structures::Vec3 random_vec3()
-    {
-        return structures::Vec3(
-            { { random_double(), random_double(), random_double() } });
-    }
-
-    structures::Vec3 random_vec3(double min, double max)
-    {
-        return structures::Vec3(
-            { { random_double(min, max), random_double(min, max),
-                random_double(min, max) } });
-    }
 } // namespace utils

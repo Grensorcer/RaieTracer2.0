@@ -43,6 +43,7 @@ namespace environment
         res->t = t;
         res->normal = normal(r.at(t));
         res->comps = get_components(r.at(t));
+        res->reflected = reflect(r.at(t));
 
         return res;
     }
@@ -50,6 +51,11 @@ namespace environment
     structures::Vec3 Sphere::normal(const structures::Vec3 &p) const
     {
         return structures::unit(p - center());
+    }
+
+    structures::Vec3 Sphere::reflect(const structures::Vec3 &p) const
+    {
+        return txt_->reflect(p, normal(p));
     }
 
     const components Sphere::get_components(const structures::Vec3 &p) const

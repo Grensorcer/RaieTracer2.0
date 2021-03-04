@@ -3,7 +3,7 @@
 namespace environment
 {
     std::optional<environment::intersection_record>
-    Scene::find_closest_intersection(const Ray &r)
+    Scene::find_closest_intersection(const Ray &r) const
     {
         auto intersection_records =
             std::vector<std::optional<environment::intersection_record>>();
@@ -26,10 +26,8 @@ namespace environment
 
     display::Colour Scene::compute_light_input(const Vec3 &intersection_point,
                                                const intersection_record &i_r,
-                                               int depth)
+                                               int depth) const
     {
-        auto reflexion = intersection_point
-            - i_r.normal * 2 * (intersection_point * i_r.normal.transpose())[0];
         double diff = 0.;
         double spec = 0.;
         for (const auto &light : lights_)
@@ -41,32 +39,36 @@ namespace environment
             auto light_ray =
                 Ray(intersection_point + light_dir * 0.05, light_dir);
             auto light_intersection = find_closest_intersection(light_ray);
-            if ((i_r.normal * light_dir.transpose())[0] < 0
-                || (light_intersection
-                    && structures::norm(light_ray.at(light_intersection->t)
-                                        - light_ray.origin())
-                        < light_distance))
+            if (light_intersection
+                && structures::norm(light_ray.at(light_intersection->t)
+                                    - light_ray.origin())
+                    < light_distance)
                 continue;
             // Diffusion
-            diff += (i_r.normal * light_dir.transpose())[0] * light->intensity()
-                / structures::norm(light->center() - intersection_point);
+            if ((i_r.normal * light_dir.transpose())[0] > 0)
+                diff += (i_r.normal * light_dir.transpose())[0]
+                    * light->intensity()
+                    / structures::norm(light->center() - intersection_point);
 
             // Specularity
-            auto s_sp = (reflexion * light_dir.transpose())[0];
-            spec += pow(s_sp >= 0 ? s_sp : 0, std::get<3>(i_r.comps))
-                * light->intensity()
-                / structures::norm(light->center() - intersection_point);
+            auto s_sp = (i_r.reflected * light_dir.transpose())[0];
+            if (s_sp > 0)
+                spec += pow(s_sp, std::get<3>(i_r.comps)) * light->intensity()
+                    / structures::norm(light->center() - intersection_point);
         }
 
-        return std::get<0>(i_r.comps)
+        auto res = std::get<0>(i_r.comps)
             * (std::get<1>(i_r.comps) * diff + std::get<2>(i_r.comps) * spec
-               + ambiant_light_)
-            + std::get<0>(i_r.comps)
-            * cast_ray(Ray(intersection_point + reflexion * 0.05, reflexion),
-                       depth - 1);
+               + ambiant_light_);
+        if ((i_r.reflected * i_r.normal.transpose())[0] > 0)
+            res += std::get<0>(i_r.comps)
+                * cast_ray(Ray(intersection_point + i_r.reflected * 0.05,
+                               i_r.reflected),
+                           depth - 1);
+        return res;
     }
 
-    display::Colour Scene::compute_sky(const Ray &r)
+    display::Colour Scene::compute_sky(const Ray &r) const
     {
         auto gradient = 0.5 * (r.direction()[2] + 1.);
         return (display::Colour(1., 1., 1.) * (1. - gradient)
@@ -74,7 +76,7 @@ namespace environment
             * ambiant_light_;
     }
 
-    display::Colour Scene::cast_ray(const Ray &r, int depth)
+    display::Colour Scene::cast_ray(const Ray &r, int depth) const
     {
         auto colour = display::Colour();
         if (depth >= 0)

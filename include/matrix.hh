@@ -213,13 +213,16 @@ namespace structures
         return rhs;
     }
 
-    FixedMatrix<1ul, 3ul> operator^(const FixedMatrix<1ul, 3ul> &lhs,
-                                    const FixedMatrix<1ul, 3ul> &rhs);
+    template <size_t W>
+    double norm_squared(const FixedMatrix<1, W> &v)
+    {
+        return (v * v.transpose())[0];
+    }
 
     template <size_t W>
     double norm(const FixedMatrix<1, W> &v)
     {
-        return sqrt((v * v.transpose())[0]);
+        return sqrt(norm_squared(v));
     }
 
     template <size_t W>
@@ -227,5 +230,11 @@ namespace structures
     {
         return v / norm(v);
     }
+
+    Vec3 operator^(const Vec3 &lhs, const Vec3 &rhs);
+    Vec3 random();
+    Vec3 random(double min, double max);
+    Vec3 random_unit1();
+    Vec3 random_unit2();
 
 } // namespace structures

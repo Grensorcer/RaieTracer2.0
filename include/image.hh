@@ -36,6 +36,7 @@ namespace display
             return rgb_[2];
         }
 
+        Colour &operator=(const Colour &c);
         bool operator==(const Colour &c) const;
         bool operator!=(const Colour &c) const;
 

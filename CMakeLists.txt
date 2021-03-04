@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.10)
 
 project(RaieTracer2.0 VERSION 0.1 LANGUAGES CXX)
 
+set(THREADS_PREFER_PTHREAD_FLAG on)
+find_package(Threads REQUIRED)
+
 # gtest
 # Download and unpack googletest at configure time
 configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
@@ -40,7 +43,8 @@ set(SRC src/matrix.cc src/texture.cc src/camera.cc src/image.cc src/light.cc src
 
 add_executable(RaieTracer src/main.cc ${SRC})
 target_compile_features(RaieTracer PUBLIC cxx_std_17)
-target_compile_options(RaieTracer PUBLIC -Wall -Werror -Wextra -pedantic)
+target_compile_options(RaieTracer PUBLIC -Wall -Werror -Wextra -pedantic -lpthread)
+target_link_libraries(RaieTracer PRIVATE Threads::Threads)
 target_include_directories(RaieTracer PUBLIC
                           "${PROJECT_SOURCE_DIR}/include")
 

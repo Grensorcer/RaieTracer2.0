@@ -11,6 +11,8 @@ namespace environment
     {
     public:
         virtual ~Texture_Material() = default;
+        virtual structures::Vec3 reflect(const structures::Vec3 &p,
+                                         const structures::Vec3 &n) const = 0;
         virtual const std::tuple<display::Colour, double, double, double>
         get_components(const structures::Vec3 &p) const = 0;
     };
@@ -25,6 +27,9 @@ namespace environment
             , ks_{ ks }
             , ns_{ ns }
         {}
+
+        structures::Vec3 reflect(const structures::Vec3 &p,
+                                 const structures::Vec3 &n) const override;
 
         const std::tuple<display::Colour, double, double, double>
         get_components(const structures::Vec3 &p) const override;
