@@ -1,6 +1,6 @@
 #include "utils.hh"
 
-#include <cstdlib>
+#include <random>
 
 namespace utils
 {
@@ -12,12 +12,16 @@ namespace utils
 
     double random_double()
     {
-        return std::rand() / (RAND_MAX + 1.);
+        static thread_local std::mt19937 generator;
+        std::uniform_real_distribution<> d(0., 1.);
+        return d(generator);
     }
 
     double random_double(double min, double max)
     {
-        return min + random_double() * (max - min);
+        static thread_local std::mt19937 generator;
+        std::uniform_real_distribution<> d(min, max);
+        return d(generator);
     }
 
 } // namespace utils
