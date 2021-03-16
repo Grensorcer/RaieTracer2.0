@@ -112,7 +112,7 @@ namespace environment
         if (utils::almost_equal(dot_prod, 0))
             return res;
         double d = n * a_;
-        double t = -(n * r.origin() + d) / dot_prod;
+        double t = (n * r.origin() + d) / dot_prod;
         structures::Vec3 i = r.at(t);
 
         structures::Vec3 e0 = b_ - a_;
