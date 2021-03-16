@@ -22,12 +22,19 @@ namespace environment
                const structures::Vec3 &focus, double focal_length, double v_fov,
                double h_fov)
             : center_{ center }
-            , z_{ structures::unit(z) }
-            , y_{ structures::unit(focus) }
+            , z_{ z }
+            , y_{ focus }
+            , x_{ z_ ^ y_ }
             , focal_length_{ focal_length }
             , v_fov_{ v_fov }
             , h_fov_{ h_fov }
-        {}
+        {
+            structures::unit(z_);
+            structures::unit(y_);
+            structures::unit(x_);
+            upper_left_corner_ =
+                focal_length_ * y_ + x_ * (h_fov_ / 2.) + z_ * (v_fov_ / 2.);
+        }
         const double &focal_length() const
         {
             return focal_length_;
@@ -72,11 +79,10 @@ namespace environment
         structures::Vec3 center_;
         structures::Vec3 z_ = structures::Vec3({ { 0, 0, 1 } });
         structures::Vec3 y_ = structures::Vec3({ { 0, -1, 0 } });
-        structures::Vec3 x_ = z_ ^ y_;
+        structures::Vec3 x_;
         double focal_length_ = 1.;
         double v_fov_ = 2.;
         double h_fov_ = 2.;
-        structures::Vec3 upper_left_corner_ =
-            focal_length_ * y_ + x_ * (h_fov_ / 2.) + z_ * (v_fov_ / 2.);
+        structures::Vec3 upper_left_corner_;
     };
 } // namespace environment

@@ -4,7 +4,6 @@
 
 #include "image.hh"
 #include "matrix.hh"
-
 namespace environment
 {
     class Texture_Material
@@ -13,7 +12,7 @@ namespace environment
         virtual ~Texture_Material() = default;
         virtual structures::Vec3 reflect(const structures::Vec3 &p,
                                          const structures::Vec3 &n) const = 0;
-        virtual const std::tuple<display::Colour, double, double, double>
+        virtual std::tuple<display::Colour, double, double, double>
         get_components(const structures::Vec3 &p) const = 0;
     };
 
@@ -28,10 +27,7 @@ namespace environment
             , ns_{ ns }
         {}
 
-        structures::Vec3 reflect(const structures::Vec3 &p,
-                                 const structures::Vec3 &n) const override;
-
-        const std::tuple<display::Colour, double, double, double>
+        std::tuple<display::Colour, double, double, double>
         get_components(const structures::Vec3 &p) const override;
 
     protected:
@@ -39,5 +35,19 @@ namespace environment
         double kd_;
         double ks_;
         double ns_;
+    };
+
+    class Uniform_Metal : public Uniform_Texture
+    {
+        using Uniform_Texture::Uniform_Texture;
+        structures::Vec3 reflect(const structures::Vec3 &p,
+                                 const structures::Vec3 &n) const override;
+    };
+
+    class Uniform_Matte : public Uniform_Texture
+    {
+        using Uniform_Texture::Uniform_Texture;
+        structures::Vec3 reflect(const structures::Vec3 &p,
+                                 const structures::Vec3 &n) const override;
     };
 } // namespace environment

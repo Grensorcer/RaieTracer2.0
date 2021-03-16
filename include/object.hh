@@ -24,9 +24,9 @@ namespace environment
     class Object
     {
     public:
-        Object(const structures::Vec3 &center, Texture_Material *txt)
+        Object(Texture_Material *txt)
             : txt_{ txt }
-            , center_{ center } {};
+        {}
 
         virtual ~Object() = default;
         virtual std::optional<intersection_record>
@@ -35,16 +35,17 @@ namespace environment
         virtual structures::Vec3 reflect(const structures::Vec3 &p) const = 0;
         virtual const components
         get_components(const structures::Vec3 &p) const = 0;
-        virtual const structures::Vec3 at(double i, double j) const = 0;
+        // virtual const structures::Vec3 at(double i, double j) const = 0;
 
+        /*
         const structures::Vec3 &center() const
         {
             return center_;
         }
+        */
 
     protected:
-        std::unique_ptr<Texture_Material> txt_;
-        structures::Vec3 center_;
+        std::shared_ptr<Texture_Material> txt_;
     };
 
     class Sphere : public Object
@@ -52,8 +53,9 @@ namespace environment
     public:
         Sphere(const structures::Vec3 &center, Texture_Material *txt,
                const double &radius)
-            : Object(center, txt)
+            : Object(txt)
             , r_{ radius }
+            , center_{ center }
         {}
 
         const double &radius() const
@@ -61,7 +63,39 @@ namespace environment
             return r_;
         }
 
-        const structures::Vec3 at(double i, double j) const override;
+        // const structures::Vec3 at(double i, double j) const override;
+
+        std::optional<intersection_record>
+        intersection(const Ray &r) const override;
+
+        structures::Vec3 reflect(const structures::Vec3 &p) const override;
+        structures::Vec3 normal(const structures::Vec3 &p) const override;
+        const structures::Vec3 &center() const
+        {
+            return center_;
+        }
+
+        const components
+        get_components(const structures::Vec3 &p) const override;
+
+    protected:
+        double r_;
+        structures::Vec3 center_;
+    };
+
+    class Triangle : public Object
+    {
+    public:
+        Triangle(Texture_Material *txt, const structures::Vec3 &a,
+                 const structures::Vec3 &b, const structures::Vec3 &c)
+            : Object(txt)
+            , a_{ a }
+            , b_{ b }
+            , c_{ c }
+            , normal_{ (b_ - a_) ^ (c_ - a_) }
+        {
+            structures::unit(normal_);
+        }
 
         std::optional<intersection_record>
         intersection(const Ray &r) const override;
@@ -73,6 +107,42 @@ namespace environment
         get_components(const structures::Vec3 &p) const override;
 
     protected:
-        double r_;
+        structures::Vec3 a_;
+        structures::Vec3 b_;
+        structures::Vec3 c_;
+        structures::Vec3 normal_;
     };
+
+    class Plane : public Object
+    {
+    public:
+        Plane(const structures::Vec3 &center, Texture_Material *txt,
+              const structures::Vec3 &normal)
+            : Object(txt)
+            , normal_{ normal }
+            , center_{ center }
+        {
+            structures::unit(normal);
+        }
+
+        // const structures::Vec3 at(double i, double j) const override;
+
+        std::optional<intersection_record>
+        intersection(const Ray &r) const override;
+
+        structures::Vec3 reflect(const structures::Vec3 &p) const override;
+        structures::Vec3 normal(const structures::Vec3 &p) const override;
+        const structures::Vec3 &center() const
+        {
+            return center_;
+        }
+
+        const components
+        get_components(const structures::Vec3 &p) const override;
+
+    protected:
+        structures::Vec3 normal_;
+        structures::Vec3 center_;
+    };
+
 } // namespace environment

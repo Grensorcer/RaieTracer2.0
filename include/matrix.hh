@@ -85,7 +85,7 @@ namespace structures
         // Matrix operation
         FixedMatrix<H, W> operator-() const
         {
-            FixedMatrix<W, H> opposite;
+            FixedMatrix<H, W> opposite;
             for (size_t i = 0; i < H; ++i)
                 for (size_t j = 0; j < W; ++j)
                     opposite.at(i, j) = -(this->at(i, j));
@@ -231,6 +231,14 @@ namespace structures
         return v / norm(v);
     }
 
+    template <size_t W>
+    FixedMatrix<1, W> &unit(FixedMatrix<1, W> &v)
+    {
+        v /= norm(v);
+        return v;
+    }
+
+    double operator*(const Vec3 &lhs, const Vec3 &rhs);
     Vec3 operator^(const Vec3 &lhs, const Vec3 &rhs);
     Vec3 random();
     Vec3 random(double min, double max);
