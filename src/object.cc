@@ -106,6 +106,7 @@ namespace environment
         std::optional<intersection_record> res;
         structures::Vec3 n = normal_ * r.direction() >= 0 ? -normal_ : normal_;
         double dot_prod = n * r.direction();
+        std::cout << "dot_prod: " << dot_prod << '\n';
         if (utils::almost_equal(dot_prod, 0))
             return res;
         double d = n * a_;
@@ -118,14 +119,13 @@ namespace environment
         structures::Vec3 bc0 = i - a_;
         structures::Vec3 bc1 = i - b_;
         structures::Vec3 bc2 = i - c_;
+        std::cout << "t: " << t << '\n'
+                  << "n: " << n << '\n'
+                  << "d: " << d << '\n';
         if (t <= 0 || n * (e0 ^ bc0) <= 0 || n * (e1 ^ bc1) <= 0
             || n * (e2 ^ bc2) <= 0)
             return res;
 
-        std::cout << "t: " << t << '\n'
-                  << "n: " << n << '\n'
-                  << "d: " << d << '\n'
-                  << "dot_prod: " << dot_prod << '\n';
         res = std::make_optional<>(intersection_record{});
         res->t = t;
         res->normal = n;
