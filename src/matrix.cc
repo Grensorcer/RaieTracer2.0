@@ -4,6 +4,11 @@
 
 namespace structures
 {
+    double operator*(const Vec3 &lhs, const Vec3 &rhs)
+    {
+        return (lhs * rhs.transpose())[0];
+    }
+
     Vec3 operator^(const Vec3 &lhs, const Vec3 &rhs)
     {
         return Vec3({ { lhs[1] * rhs[2] - lhs[2] * rhs[1],
@@ -37,6 +42,7 @@ namespace structures
 
     Vec3 random_unit2()
     {
-        return unit(random(-1, 1));
+        auto rand = random(-1, 1);
+        return unit(rand);
     }
 } // namespace structures

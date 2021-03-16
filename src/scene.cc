@@ -32,10 +32,9 @@ namespace environment
         double spec = 0.;
         for (const auto &light : lights_)
         {
-            auto light_dir =
-                structures::unit(light->center() - intersection_point);
-            auto light_distance =
-                structures::norm(light->center() - intersection_point);
+            auto intersection_to_light = light->center() - intersection_point;
+            auto light_distance = structures::norm(intersection_to_light);
+            auto &light_dir = structures::unit(intersection_to_light);
             auto light_ray =
                 Ray(intersection_point + light_dir * 0.05, light_dir);
             auto light_intersection = find_closest_intersection(light_ray);
@@ -45,22 +44,27 @@ namespace environment
                     < light_distance)
                 continue;
             // Diffusion
-            if ((i_r.normal * light_dir.transpose())[0] > 0)
-                diff += (i_r.normal * light_dir.transpose())[0]
-                    * light->intensity()
-                    / structures::norm(light->center() - intersection_point);
+            auto diff_angle = i_r.normal * light_dir;
+            if (diff_angle > 0)
+                diff += diff_angle * light->intensity() / light_distance;
 
             // Specularity
-            auto s_sp = (i_r.reflected * light_dir.transpose())[0];
+            auto s_sp = i_r.reflected * light_dir;
             if (s_sp > 0)
+            {
+                // std::cout << "SPECU: " << s_sp << '\n';
+                // std::cout << "POW: " << std::get<3>(i_r.comps) << '\n';
+                // std::cout << "GIVES: " << pow(s_sp, std::get<3>(i_r.comps))
+                // << '\n';
                 spec += pow(s_sp, std::get<3>(i_r.comps)) * light->intensity()
-                    / structures::norm(light->center() - intersection_point);
+                    / light_distance;
+            }
         }
 
         auto res = std::get<0>(i_r.comps)
-            * (std::get<1>(i_r.comps) * diff + std::get<2>(i_r.comps) * spec
-               + ambiant_light_);
-        if ((i_r.reflected * i_r.normal.transpose())[0] > 0)
+                * (std::get<1>(i_r.comps) * diff + ambiant_light_)
+            + display::Colour(1., 1., 1.) * std::get<2>(i_r.comps) * spec;
+        if (i_r.reflected * i_r.normal > 0)
             res += std::get<0>(i_r.comps)
                 * cast_ray(Ray(intersection_point + i_r.reflected * 0.05,
                                i_r.reflected),
