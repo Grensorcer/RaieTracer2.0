@@ -121,7 +121,7 @@ namespace environment
         structures::Vec3 bc2 = i - c_;
         std::cout << "t: " << t << '\n'
                   << "n: " << n << "d: " << d << '\n'
-                  << "fdp: " << (e0 ^ bc0) << '\n'
+                  << "point: " << i << "fdp: " << (e0 ^ bc0) << '\n'
                   << "sdp: " << (e1 ^ bc1) << '\n'
                   << "tdp: " << (e2 ^ bc2) << '\n';
         if (t <= 0 || n * (e0 ^ bc0) <= 0 || n * (e1 ^ bc1) <= 0
