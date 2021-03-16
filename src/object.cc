@@ -108,8 +108,8 @@ namespace environment
         double dot_prod = n * r.direction();
         if (utils::almost_equal(dot_prod, 0))
             return res;
-        double d = a_ * n;
-        double t = -(n * r.origin() + d) / -dot_prod;
+        double d = n * a_;
+        double t = (n * r.origin() + d) / dot_prod;
         structures::Vec3 i = r.at(t);
 
         structures::Vec3 e0 = b_ - a_;
@@ -122,6 +122,10 @@ namespace environment
             || n * (e2 ^ bc2) <= 0)
             return res;
 
+        std::cout << "t: " << t << '\n'
+                  << "n: " << n << '\n'
+                  << "d: " << d << '\n'
+                  << "dot_prod: " << dot_prod << '\n';
         res = std::make_optional<>(intersection_record{});
         res->t = t;
         res->normal = n;
