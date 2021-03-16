@@ -44,7 +44,7 @@ namespace environment
         res->t = t;
         res->normal = normal(r.at(t));
         res->comps = get_components(r.at(t));
-        res->reflected = reflect(r.at(t));
+        res->reflected = reflect(r.at(t), res->normal);
 
         return res;
     }
@@ -56,9 +56,10 @@ namespace environment
         return normal;
     }
 
-    structures::Vec3 Sphere::reflect(const structures::Vec3 &p) const
+    structures::Vec3 Sphere::reflect(const structures::Vec3 &p,
+                                     const structures::Vec3 &n) const
     {
-        return txt_->reflect(p, normal(p));
+        return txt_->reflect(p, n);
     }
 
     const components Sphere::get_components(const structures::Vec3 &p) const
@@ -79,14 +80,15 @@ namespace environment
         res->t = t;
         res->normal = normal(r.at(t));
         res->comps = get_components(r.at(t));
-        res->reflected = reflect(r.at(t));
+        res->reflected = reflect(r.at(t), res->normal);
 
         return res;
     }
 
-    structures::Vec3 Plane::reflect(const structures::Vec3 &p) const
+    structures::Vec3 Plane::reflect(const structures::Vec3 &p,
+                                    const structures::Vec3 &n) const
     {
-        return txt_->reflect(p, normal(p));
+        return txt_->reflect(p, n);
     }
 
     structures::Vec3 Plane::normal(const structures::Vec3 &p) const
@@ -133,14 +135,15 @@ namespace environment
         res->t = t;
         res->normal = n;
         res->comps = get_components(i);
-        res->reflected = reflect(i);
+        res->reflected = reflect(i, n);
 
         return res;
     }
 
-    structures::Vec3 Triangle::reflect(const structures::Vec3 &p) const
+    structures::Vec3 Triangle::reflect(const structures::Vec3 &p,
+                                       const structures::Vec3 &n) const
     {
-        return txt_->reflect(p, normal(p));
+        return txt_->reflect(p, n);
     }
     structures::Vec3 Triangle::normal(const structures::Vec3 &p) const
     {

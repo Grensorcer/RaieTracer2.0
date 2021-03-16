@@ -32,7 +32,8 @@ namespace environment
         virtual std::optional<intersection_record>
         intersection(const Ray &r) const = 0;
         virtual structures::Vec3 normal(const structures::Vec3 &p) const = 0;
-        virtual structures::Vec3 reflect(const structures::Vec3 &p) const = 0;
+        virtual structures::Vec3 reflect(const structures::Vec3 &p,
+                                         const structures::Vec3 &n) const = 0;
         virtual const components
         get_components(const structures::Vec3 &p) const = 0;
         // virtual const structures::Vec3 at(double i, double j) const = 0;
@@ -68,7 +69,8 @@ namespace environment
         std::optional<intersection_record>
         intersection(const Ray &r) const override;
 
-        structures::Vec3 reflect(const structures::Vec3 &p) const override;
+        structures::Vec3 reflect(const structures::Vec3 &p,
+                                 const structures::Vec3 &n) const override;
         structures::Vec3 normal(const structures::Vec3 &p) const override;
         const structures::Vec3 &center() const
         {
@@ -100,7 +102,8 @@ namespace environment
         std::optional<intersection_record>
         intersection(const Ray &r) const override;
 
-        structures::Vec3 reflect(const structures::Vec3 &p) const override;
+        structures::Vec3 reflect(const structures::Vec3 &p,
+                                 const structures::Vec3 &n) const override;
         structures::Vec3 normal(const structures::Vec3 &p) const override;
 
         const components
@@ -130,7 +133,8 @@ namespace environment
         std::optional<intersection_record>
         intersection(const Ray &r) const override;
 
-        structures::Vec3 reflect(const structures::Vec3 &p) const override;
+        structures::Vec3 reflect(const structures::Vec3 &p,
+                                 const structures::Vec3 &n) const override;
         structures::Vec3 normal(const structures::Vec3 &p) const override;
         const structures::Vec3 &center() const
         {

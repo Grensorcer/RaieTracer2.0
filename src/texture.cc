@@ -13,12 +13,6 @@ namespace environment
                                             const structures::Vec3 &n) const
     {
         return structures::unit(p - n * 2 * p * n);
-        /* (void)p;
-        auto reflected = n + structures::random_unit1();
-        structures::unit(reflected);
-        if (reflected == structures::Vec3())
-            return n;
-        return reflected; */
     }
 
     structures::Vec3 Uniform_Matte::reflect(const structures::Vec3 &p,
