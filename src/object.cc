@@ -124,8 +124,8 @@ namespace environment
                   << "point: " << i << "fdp: " << (e0 ^ bc0) << '\n'
                   << "sdp: " << (e1 ^ bc1) << '\n'
                   << "tdp: " << (e2 ^ bc2) << '\n';
-        if (t <= 0 || n * (e0 ^ bc0) <= 0 || n * (e1 ^ bc1) <= 0
-            || n * (e2 ^ bc2) <= 0)
+        if (t <= 0 || n * (e0 ^ bc0) < 0 || n * (e1 ^ bc1) < 0
+            || n * (e2 ^ bc2) < 0)
             return res;
 
         res = std::make_optional<>(intersection_record{});
