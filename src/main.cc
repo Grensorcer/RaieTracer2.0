@@ -21,7 +21,7 @@ int main()
     constexpr size_t nb_threads = 8;
 
     // Camera
-    auto cam_origin = structures::Vec3({ { 0, 1, 0 } });
+    auto cam_origin = structures::Vec3({ { 0, 1, 0.5 } });
     auto v_fov = 2.0;
     auto h_fov = aspect_ratio * v_fov;
     auto cam = environment::Camera(
@@ -53,18 +53,18 @@ int main()
                                        1.),
         100.));
     */
-    /* objects.emplace_back(std::make_shared<environment::Plane>(
+    objects.emplace_back(std::make_shared<environment::Plane>(
         structures::Vec3({ { 0, 0, -1 } }),
         new environment::Uniform_Metal(display::Colour(0, 0.33, 0.1), 1., 1.,
                                        1.),
         structures::Vec3({ { 0, 0, 1 } })));
-    */
 
     objects.emplace_back(std::make_shared<environment::Triangle>(
-        new environment::Uniform_Metal(display::Colour(0.33, 0.33, 0.5), 1., 1.,
+        new environment::Uniform_Matte(display::Colour(0.80, 0.1, 0.5), 1., 1.,
                                        1.),
-        structures::Vec3({ { -2, 2, -1 } }), structures::Vec3({ { -2, 2, 1 } }),
-        structures::Vec3({ { -3, 2, -1 } })));
+        structures::Vec3({ { -2, -3, 1 } }),
+        structures::Vec3({ { -1, -5, -1 } }),
+        structures::Vec3({ { -3, -5, -1 } })));
 
     lights.emplace_back(std::make_shared<environment::Point_Light>(
         structures::Vec3({ { -3, -3, 2 } }), 3.));

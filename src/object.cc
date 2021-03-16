@@ -107,30 +107,29 @@ namespace environment
     {
         std::optional<intersection_record> res;
         structures::Vec3 n = normal_ * r.direction() >= 0 ? -normal_ : normal_;
-        double dot_prod = n * r.direction();
-        // std::cout << "dot_prod: " << dot_prod << '\n';
-        if (utils::almost_equal(dot_prod, 0))
-            return res;
-        double d = n * a_;
-        double t = (n * r.origin() + d) / dot_prod;
-        structures::Vec3 i = r.at(t);
-
         structures::Vec3 e0 = b_ - a_;
-        structures::Vec3 e1 = c_ - b_;
-        structures::Vec3 e2 = a_ - c_;
-        structures::Vec3 bc0 = i - a_;
-        structures::Vec3 bc1 = i - b_;
-        structures::Vec3 bc2 = i - c_;
-        /* if (!utils::almost_equal(t, 1))
-            std::cout << "t: " << t << '\n'
-                      << "n: " << n << "d: " << d << '\n'
-                      << "point: " << i << "fdp: " << (e0 ^ bc0)
-                      << "sdp: " << (e1 ^ bc1) << "tdp: " << (e2 ^ bc2);
-                      */
-        if (t <= 0 || n * (e0 ^ bc0) < 0 || n * (e1 ^ bc1) < 0
-            || n * (e2 ^ bc2) < 0)
+        structures::Vec3 e1 = c_ - a_;
+        structures::Vec3 h = r.direction() ^ e1;
+        float a = e0 * h;
+        if (utils::almost_equal(a, 0))
             return res;
 
+        float f = 1.0 / a;
+        structures::Vec3 s = r.origin() - a_;
+        float u = f * (s * h);
+        if (u < 0.0 || u > 1.0)
+            return res;
+
+        structures::Vec3 q = s ^ e0;
+        float v = f * (r.direction() * q);
+        if (v < 0.0 || u + v > 1.0)
+            return res;
+
+        float t = f * (e1 * q);
+        if (t <= 0)
+            return res;
+
+        structures::Vec3 i = r.at(t);
         res = std::make_optional<>(intersection_record{});
         res->t = t;
         res->normal = n;
