@@ -98,4 +98,14 @@ namespace environment
         return colour;
     }
 
+    void Scene::add_object(std::shared_ptr<Object> o)
+    {
+        objects_.emplace_back(o);
+    }
+
+    void Scene::add_light(std::shared_ptr<Light> l)
+    {
+        lights_.emplace_back(l);
+    }
+
 } // namespace environment

@@ -4,11 +4,6 @@
 
 namespace structures
 {
-    double operator*(const Vec3 &lhs, const Vec3 &rhs)
-    {
-        return (lhs * rhs.transpose())[0];
-    }
-
     Vec3 operator^(const Vec3 &lhs, const Vec3 &rhs)
     {
         return Vec3({ { lhs[1] * rhs[2] - lhs[2] * rhs[1],

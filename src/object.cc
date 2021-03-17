@@ -16,16 +16,18 @@ namespace environment
         // Translation on ray to center on the sphere
         structures::Vec3 oc = r.origin() - center();
         double a = r.direction() * r.direction();
-        double b = 2. * r.direction() * oc;
+        double b = 2. * (r.direction() * oc);
         double c = oc * oc - radius() * radius();
 
-        double discriminant = b * b - 4 * a * c;
+        double discriminant = b * b - 4 * (a * c);
         std::optional<intersection_record> res;
         if (discriminant < 0)
             return res;
 
-        double sol1 = (-b - sqrt(discriminant)) / (2 * a);
-        double sol2 = (-b + sqrt(discriminant)) / (2 * a);
+        double s_discriminant = sqrt(discriminant);
+        a *= 2;
+        double sol1 = (-b - s_discriminant) / a;
+        double sol2 = (-b + s_discriminant) / a;
         double t;
         structures::Vec3 p1 = r.at(sol1);
         structures::Vec3 p2 = r.at(sol2);
@@ -111,7 +113,7 @@ namespace environment
         structures::Vec3 e1 = c_ - a_;
         structures::Vec3 h = r.direction() ^ e1;
         float a = e0 * h;
-        if (utils::almost_equal(a, 0))
+        if (utils::almost_equal(e0 * h, 0))
             return res;
 
         float f = 1.0 / a;

@@ -37,6 +37,13 @@ namespace environment
         double ns_;
     };
 
+    class Uniform_Smooth : public Uniform_Texture
+    {
+        using Uniform_Texture::Uniform_Texture;
+        structures::Vec3 reflect(const structures::Vec3 &p,
+                                 const structures::Vec3 &n) const override;
+    };
+
     class Uniform_Metal : public Uniform_Texture
     {
         using Uniform_Texture::Uniform_Texture;

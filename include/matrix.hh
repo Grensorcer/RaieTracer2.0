@@ -214,9 +214,18 @@ namespace structures
     }
 
     template <size_t W>
+    double operator*(const FixedMatrix<1, W> &lhs, const FixedMatrix<1, W> &rhs)
+    {
+        double res = 0.;
+        for (size_t i = 0; i < W; ++i)
+            res += lhs[i] * rhs[i];
+        return res;
+    }
+
+    template <size_t W>
     double norm_squared(const FixedMatrix<1, W> &v)
     {
-        return (v * v.transpose())[0];
+        return v * v;
     }
 
     template <size_t W>
@@ -238,7 +247,6 @@ namespace structures
         return v;
     }
 
-    double operator*(const Vec3 &lhs, const Vec3 &rhs);
     Vec3 operator^(const Vec3 &lhs, const Vec3 &rhs);
     Vec3 random();
     Vec3 random(double min, double max);

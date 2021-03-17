@@ -9,6 +9,14 @@ namespace environment
         return std::make_tuple<>(c_, kd_, ks_, ns_);
     }
 
+    structures::Vec3 Uniform_Smooth::reflect(const structures::Vec3 &p,
+                                             const structures::Vec3 &n) const
+    {
+        (void)p;
+        (void)n;
+        return structures::Vec3({ { 0, 0, 0 } });
+    }
+
     structures::Vec3 Uniform_Metal::reflect(const structures::Vec3 &p,
                                             const structures::Vec3 &n) const
     {

@@ -27,17 +27,11 @@ namespace environment
     {
     public:
         Scene();
-        Scene(Camera &cam, std::vector<std::shared_ptr<Object>> &objects,
-              std::vector<std::shared_ptr<Light>> &lights)
+        Scene(Camera &cam)
             : cam_{ cam }
-            , objects_{ objects }
-            , lights_{ lights }
         {}
-        Scene(Camera &cam, std::vector<std::shared_ptr<Object>> &objects,
-              std::vector<std::shared_ptr<Light>> &lights, double ambiant_light)
+        Scene(Camera &cam, double ambiant_light)
             : cam_{ cam }
-            , objects_{ objects }
-            , lights_{ lights }
             , ambiant_light_{ ambiant_light }
         {}
 
@@ -51,6 +45,9 @@ namespace environment
         display::Colour compute_sky(const Ray &r) const;
 
         display::Colour cast_ray(const Ray &r, int depth) const;
+
+        void add_object(std::shared_ptr<Object> o);
+        void add_light(std::shared_ptr<Light> l);
 
     private:
         Camera cam_;
