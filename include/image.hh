@@ -69,16 +69,18 @@ namespace display
             pixels_ = std::vector<Colour>(height * width);
         }
 
-        const Colour &get_pixel(size_t i, size_t j) const
+        inline const Colour &get_pixel(size_t i, size_t j) const
         {
             return pixels_[j + i * width_];
         }
 
-        void set_pixel(size_t i, size_t j, const Colour &c)
+        inline void set_pixel(size_t i, size_t j, const Colour &c)
         {
             pixels_[j + i * width_] = c;
         }
 
+        Image &operator+=(const Image &im);
+        Image &operator/=(double d);
         friend std::ostream &operator<<(std::ostream &os, const Image &i);
 
     protected:

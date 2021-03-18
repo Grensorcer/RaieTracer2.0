@@ -91,6 +91,22 @@ namespace display
                   << static_cast<int>(256 * std::clamp(c.b(), 0., 0.999999));
     }
 
+    Image &Image::operator+=(const Image &rhs)
+    {
+        for (size_t i = 0; i < width_ * height_; ++i)
+            pixels_[i] += rhs.pixels_[i];
+
+        return *this;
+    }
+
+    Image &Image::operator/=(double d)
+    {
+        for (size_t i = 0; i < width_ * height_; ++i)
+            pixels_[i] /= d;
+
+        return *this;
+    }
+
     std::ostream &operator<<(std::ostream &os, const Image &im)
     {
         os << "P3\n" << im.width_ << ' ' << im.height_ << "\n255\n";

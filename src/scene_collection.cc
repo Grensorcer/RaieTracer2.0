@@ -46,9 +46,10 @@ namespace environment
 
     Scene &scene_triangles(Scene &s)
     {
-        for (size_t k = 0; k < 6; ++k)
-            for (size_t i = 0; i < 6; ++i)
-                for (size_t j = 0; j < 6; ++j)
+        size_t nb = 6;
+        for (size_t k = 0; k < nb; ++k)
+            for (size_t i = 0; i < nb; ++i)
+                for (size_t j = 0; j < nb; ++j)
                     s.add_object(std::make_shared<environment::Triangle>(
                         new environment::Uniform_Smooth(
                             display::Colour(0.2, 0.3, 0.7), 1., 1., 1.),
@@ -56,8 +57,8 @@ namespace environment
                         structures::Vec3({ { 2. - i, -(4. + k), 3. - j } }),
                         structures::Vec3({ { 3. - i, -(4. + k), 2. - j } })));
 
-        s.add_light(std::make_shared<environment::Point_Light>(
-            structures::Vec3({ { 0, -5, 5 } }), 5.));
+        // s.add_light(std::make_shared<environment::Point_Light>(
+        //    structures::Vec3({ { 0, -5, 5 } }), 5.));
 
         return s;
     }

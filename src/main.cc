@@ -18,8 +18,8 @@ int main()
     const size_t width = 1920;
     const size_t height = width / aspect_ratio;
     auto im = display::Image(height, width);
-    constexpr size_t sample_per_pixel = 10;
-    constexpr size_t nb_threads = 8;
+    constexpr size_t sample_per_pixel = 64;
+    constexpr size_t nb_threads = 4;
 
     // Camera
     auto cam_origin = structures::Vec3({ { 0, 0, 0 } });
@@ -28,13 +28,13 @@ int main()
     auto cam = environment::Camera(
         cam_origin, structures::Vec3({ { 0, 0, 1 } }),
         structures::Vec3({ { 0, -1, 0 } }), 1., v_fov, h_fov);
-    auto scene = environment::Scene(cam, 0.3);
+    auto scene = environment::Scene(cam, 0.2);
 
-    environment::scene_triangles(scene);
+    environment::scene_one(scene);
 
     auto t_pool = std::vector<std::thread>();
-    auto l = [&](size_t ib, size_t ie) {
-        for (size_t i = ib; i < ie; ++i)
+    auto l = [&](size_t ib) {
+        for (size_t i = ib; i < height; i += nb_threads)
         {
             for (size_t j = 0; j < width; ++j)
             {
@@ -54,8 +54,7 @@ int main()
         }
     };
     for (size_t i = 0; i < nb_threads; ++i)
-        t_pool.emplace_back(std::thread(l, i * height / nb_threads,
-                                        (i + 1) * height / nb_threads));
+        t_pool.emplace_back(std::thread(l, i));
     for (auto &t : t_pool)
         t.join();
 

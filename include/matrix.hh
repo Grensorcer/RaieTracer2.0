@@ -51,33 +51,33 @@ namespace structures
         }
 
         // Getters
-        const std::array<double, (H * W)> &m() const
+        inline const std::array<double, (H * W)> &m() const
         {
             return m_;
         }
-        const size_t &width()
+        inline const size_t &width()
         {
             return width_;
         }
-        const size_t &height()
+        inline const size_t &height()
         {
             return height_;
         }
 
         // Content Access
-        const double &operator[](size_t i) const
+        inline const double &operator[](size_t i) const
         {
             return m_[i];
         }
-        double &operator[](size_t i)
+        inline double &operator[](size_t i)
         {
             return m_[i];
         }
-        const double &at(size_t i, size_t j) const
+        inline const double &at(size_t i, size_t j) const
         {
             return m_[j + i * W];
         }
-        double &at(size_t i, size_t j)
+        inline double &at(size_t i, size_t j)
         {
             return m_[j + i * W];
         }
