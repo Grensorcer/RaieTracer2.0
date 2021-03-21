@@ -24,7 +24,7 @@ namespace environment
     class Object
     {
     public:
-        Object(Texture_Material *txt)
+        Object(std::shared_ptr<Texture_Material> txt)
             : txt_{ txt }
         {}
 
@@ -52,8 +52,8 @@ namespace environment
     class Sphere : public Object
     {
     public:
-        Sphere(const structures::Vec3 &center, Texture_Material *txt,
-               const double &radius)
+        Sphere(const structures::Vec3 &center,
+               std::shared_ptr<Texture_Material> txt, const double &radius)
             : Object(txt)
             , r_{ radius }
             , center_{ center }
@@ -88,8 +88,9 @@ namespace environment
     class Triangle : public Object
     {
     public:
-        Triangle(Texture_Material *txt, const structures::Vec3 &a,
-                 const structures::Vec3 &b, const structures::Vec3 &c)
+        Triangle(std::shared_ptr<Texture_Material> txt,
+                 const structures::Vec3 &a, const structures::Vec3 &b,
+                 const structures::Vec3 &c)
             : Object(txt)
             , a_{ a }
             , b_{ b }
@@ -109,6 +110,19 @@ namespace environment
         const components
         get_components(const structures::Vec3 &p) const override;
 
+        const structures::Vec3 &a()
+        {
+            return a_;
+        }
+        const structures::Vec3 &b()
+        {
+            return b_;
+        }
+        const structures::Vec3 &c()
+        {
+            return c_;
+        }
+
     protected:
         structures::Vec3 a_;
         structures::Vec3 b_;
@@ -119,7 +133,8 @@ namespace environment
     class Plane : public Object
     {
     public:
-        Plane(const structures::Vec3 &center, Texture_Material *txt,
+        Plane(const structures::Vec3 &center,
+              std::shared_ptr<Texture_Material> txt,
               const structures::Vec3 &normal)
             : Object(txt)
             , normal_{ normal }

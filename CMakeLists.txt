@@ -39,11 +39,11 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
 endif()
 # end gtest
 
-set(SRC src/matrix.cc src/texture.cc src/camera.cc src/image.cc src/light.cc src/object.cc src/ray.cc src/scene.cc src/scene_collection.cc src/utils.cc)
+set(SRC src/matrix.cc src/texture.cc src/camera.cc src/image.cc src/light.cc src/object.cc src/ray.cc src/scene.cc src/scene_collection.cc src/utils.cc src/blob.cc)
 
 add_executable(RaieTracer src/main.cc ${SRC})
 target_compile_features(RaieTracer PUBLIC cxx_std_17)
-target_compile_options(RaieTracer PUBLIC -Wall -Werror -Wextra -pedantic -lpthread -march=native)
+target_compile_options(RaieTracer PUBLIC -Wall -Werror -Wextra -pedantic -lpthread -march=native -fopt-info-vec-optimized -fopt-info-vec-missed)
 target_link_libraries(RaieTracer PRIVATE Threads::Threads)
 target_include_directories(RaieTracer PUBLIC
                           "${PROJECT_SOURCE_DIR}/include")

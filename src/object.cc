@@ -24,7 +24,7 @@ namespace environment
         if (discriminant < 0)
             return res;
 
-        double s_discriminant = sqrt(discriminant);
+        double s_discriminant = std::sqrt(discriminant);
         a *= 2;
         double sol1 = (-b - s_discriminant) / a;
         double sol2 = (-b + s_discriminant) / a;

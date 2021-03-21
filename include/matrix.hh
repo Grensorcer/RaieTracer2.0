@@ -1,8 +1,8 @@
 #pragma once
 
 #include <array>
+#include <cmath>
 #include <iostream>
-#include <math.h>
 
 namespace utils
 {
@@ -44,9 +44,8 @@ namespace structures
         static constexpr FixedMatrix<H, W> arange()
         {
             FixedMatrix<H, W> res;
-            for (size_t i = 0; i < H; ++i)
-                for (size_t j = 0; j < W; ++j)
-                    res.at(i, j) = j + i * W;
+            for (size_t i = 0; i < H * W; ++i)
+                res[i] = i;
             return res;
         }
 
@@ -86,13 +85,12 @@ namespace structures
         FixedMatrix<H, W> operator-() const
         {
             FixedMatrix<H, W> opposite;
-            for (size_t i = 0; i < H; ++i)
-                for (size_t j = 0; j < W; ++j)
-                    opposite.at(i, j) = -(this->at(i, j));
+            for (size_t i = 0; i < H * W; ++i)
+                opposite[i] = -m_[i];
             return opposite;
         }
 
-        FixedMatrix<W, H> transpose() const
+        constexpr FixedMatrix<W, H> transpose() const
         {
             FixedMatrix<W, H> transposed;
             for (size_t i = 0; i < W; ++i)
@@ -103,44 +101,39 @@ namespace structures
 
         FixedMatrix<H, W> &operator*=(const double &rhs)
         {
-            for (size_t i = 0; i < H; ++i)
-                for (size_t j = 0; j < W; ++j)
-                    this->at(i, j) *= rhs;
+            for (size_t i = 0; i < H * W; ++i)
+                m_[i] *= rhs;
             return *this;
         }
 
         FixedMatrix<H, W> &operator/=(const double &rhs)
         {
-            for (size_t i = 0; i < H; ++i)
-                for (size_t j = 0; j < W; ++j)
-                    this->at(i, j) /= rhs;
+            for (size_t i = 0; i < H * W; ++i)
+                m_[i] /= rhs;
             return *this;
         }
 
         // Operations between matrices
         FixedMatrix<H, W> &operator+=(const FixedMatrix<H, W> &rhs)
         {
-            for (size_t i = 0; i < H; ++i)
-                for (size_t j = 0; j < W; ++j)
-                    this->at(i, j) += rhs.at(i, j);
+            for (size_t i = 0; i < H * W; ++i)
+                m_[i] += rhs[i];
             return *this;
         }
         FixedMatrix<H, W> &operator-=(const FixedMatrix<H, W> &rhs)
         {
-            for (size_t i = 0; i < H; ++i)
-                for (size_t j = 0; j < W; ++j)
-                    this->at(i, j) -= rhs.at(i, j);
+            for (size_t i = 0; i < H * W; ++i)
+                m_[i] -= rhs[i];
             return *this;
         }
 
         bool operator==(const FixedMatrix<H, W> &m2) const
         {
             auto m1 = *this;
-            for (size_t i = 0; i < H; ++i)
-                for (size_t j = 0; j < W; ++j)
-                    if (!(utils::almost_equal(m1.at(i, j), m2.at(i, j))))
-                        return false;
-            return true;
+            auto eq = true;
+            for (size_t i = 0; i < H * W && eq; ++i)
+                eq &= utils::almost_equal(m1[i], m2[i]);
+            return eq;
         }
         bool operator!=(const FixedMatrix<H, W> &m2) const
         {
@@ -189,7 +182,7 @@ namespace structures
     protected:
         const size_t width_ = W;
         const size_t height_ = H;
-        std::array<double, (H * W)> m_ = {};
+        alignas(16) std::array<double, (H * W)> m_ = {};
     };
 
     using Vec3 = FixedMatrix<1ul, 3ul>;
@@ -231,7 +224,7 @@ namespace structures
     template <size_t W>
     double norm(const FixedMatrix<1, W> &v)
     {
-        return sqrt(norm_squared(v));
+        return std::sqrt(norm_squared(v));
     }
 
     template <size_t W>

@@ -15,10 +15,10 @@ int main()
     // Image
     auto file = std::ofstream("test.ppm");
     const double aspect_ratio = 16. / 9.;
-    const size_t width = 1920;
+    const size_t width = 640;
     const size_t height = width / aspect_ratio;
     auto im = display::Image(height, width);
-    constexpr size_t sample_per_pixel = 64;
+    constexpr size_t sample_per_pixel = 4;
     constexpr size_t nb_threads = 4;
 
     // Camera
@@ -28,9 +28,15 @@ int main()
     auto cam = environment::Camera(
         cam_origin, structures::Vec3({ { 0, 0, 1 } }),
         structures::Vec3({ { 0, -1, 0 } }), 1., v_fov, h_fov);
-    auto scene = environment::Scene(cam, 0.2);
+    auto scene = environment::Scene(cam, 0.3);
 
-    environment::scene_one(scene);
+    environment::scene_blob(scene);
+    auto stop_create = std::chrono::high_resolution_clock::now();
+    auto time_create =
+        std::chrono::duration_cast<std::chrono::seconds>(stop_create - start);
+    std::cout << "Time taken to compute scene: " << time_create.count()
+              << " seconds" << '\n';
+    start = std::chrono::high_resolution_clock::now();
 
     auto t_pool = std::vector<std::thread>();
     auto l = [&](size_t ib) {
@@ -46,7 +52,7 @@ int main()
                             / (height - 1),
                         (static_cast<double>(j) + utils::random_double())
                             / (width - 1));
-                    color += scene.cast_ray(ray, 10);
+                    color += scene.cast_ray(ray, 16);
                 }
 
                 im.set_pixel(i, j, color / sample_per_pixel);
@@ -58,9 +64,11 @@ int main()
     for (auto &t : t_pool)
         t.join();
 
-    auto stop = std::chrono::high_resolution_clock::now();
-    auto time = std::chrono::duration_cast<std::chrono::seconds>(stop - start);
-    std::cout << "Time taken: " << time.count() << " seconds" << '\n';
+    auto stop_render = std::chrono::high_resolution_clock::now();
+    auto time_render =
+        std::chrono::duration_cast<std::chrono::seconds>(stop_render - start);
+    std::cout << "Time taken to render: " << time_render.count() << " seconds"
+              << '\n';
 
     file << im;
     return 0;

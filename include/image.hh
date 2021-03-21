@@ -86,7 +86,7 @@ namespace display
     protected:
         size_t width_;
         size_t height_;
-        PixelTable pixels_;
+        alignas(16) PixelTable pixels_;
     };
 
     std::ostream &operator<<(std::ostream &os, const Colour &c);

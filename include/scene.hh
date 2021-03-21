@@ -12,6 +12,7 @@
 #include <tuple>
 #include <vector>
 
+#include "blob.hh"
 #include "camera.hh"
 #include "image.hh"
 #include "light.hh"
@@ -47,6 +48,12 @@ namespace environment
         display::Colour cast_ray(const Ray &r, int depth) const;
 
         void add_object(std::shared_ptr<Object> o);
+        template <typename Iterator>
+        void add_objects(const Iterator &begin, const Iterator &end)
+        {
+            for (auto i = begin; i != end; ++i)
+                objects_.push_back(*i);
+        }
         void add_light(std::shared_ptr<Light> l);
 
     private:

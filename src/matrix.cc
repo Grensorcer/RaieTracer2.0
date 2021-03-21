@@ -26,13 +26,10 @@ namespace structures
 
     Vec3 random_unit1()
     {
-        while (true)
-        {
-            auto p = random(-1, 1);
-            if (norm_squared(p) >= 1)
-                continue;
-            return unit(p);
-        }
+        auto p = random(-1, 1);
+        while (norm_squared(p) >= 1)
+            continue;
+        return unit(p);
     }
 
     Vec3 random_unit2()
