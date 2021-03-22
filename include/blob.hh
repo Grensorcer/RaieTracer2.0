@@ -61,10 +61,12 @@ namespace environment
 
         double growth(const structures::Vec3 &p);
 
-        void build_triangles(const cube &c, std::array<int, 15> vertices,
-                             std::vector<std::shared_ptr<Triangle>> &triangles);
+        structures::Vec3 interpolate_vertex(size_t i1, size_t i2);
+        void build_triangles(
+            const cube &c, std::array<int, 15> vertices,
+            std::vector<std::shared_ptr<Smooth_Triangle>> &triangles);
 
-        std::vector<std::shared_ptr<Triangle>> marching_cubes();
+        std::vector<std::shared_ptr<Smooth_Triangle>> marching_cubes();
 
     protected:
         std::shared_ptr<Texture_Material> txt_;

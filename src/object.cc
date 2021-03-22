@@ -108,16 +108,15 @@ namespace environment
     Triangle::intersection(const Ray &r) const
     {
         std::optional<intersection_record> res;
-        structures::Vec3 n = normal_ * r.direction() >= 0 ? -normal_ : normal_;
-        structures::Vec3 e0 = b_ - a_;
-        structures::Vec3 e1 = c_ - a_;
+        structures::Vec3 e0 = vertices_[1] - vertices_[0];
+        structures::Vec3 e1 = vertices_[2] - vertices_[0];
         structures::Vec3 h = r.direction() ^ e1;
         float a = e0 * h;
         if (utils::almost_equal(e0 * h, 0))
             return res;
 
         float f = 1.0 / a;
-        structures::Vec3 s = r.origin() - a_;
+        structures::Vec3 s = r.origin() - vertices_[0];
         float u = f * (s * h);
         if (u < 0.0 || u > 1.0)
             return res;
@@ -132,6 +131,8 @@ namespace environment
             return res;
 
         structures::Vec3 i = r.at(t);
+        structures::Vec3 n = normal(u, v);
+        n = n * r.direction() >= 0 ? -n : n;
         res = std::make_optional<>(intersection_record{});
         res->t = t;
         res->normal = n;
@@ -151,10 +152,41 @@ namespace environment
         (void)p;
         return normal_;
     }
+    structures::Vec3 Triangle::normal(float u, float v) const
+    {
+        (void)u;
+        (void)v;
+        return normal_;
+    }
 
     const components Triangle::get_components(const structures::Vec3 &p) const
     {
         return txt_->get_components(p);
+    }
+
+    structures::Vec3 Smooth_Triangle::normal(const structures::Vec3 &p) const
+    {
+        auto e0 = vertices_[1] - vertices_[0];
+        auto e1 = vertices_[2] - vertices_[0];
+        auto e2 = p - vertices_[0];
+        float n0 = e0 * e0;
+        float n1 = e0 * e1;
+        float n2 = e1 * e1;
+        float n3 = e2 * e0;
+        float n4 = e2 * e1;
+        float d = n0 * n2 - n1 * n1;
+
+        auto v = (n2 * n3 - n1 * n4) / d;
+        auto w = (n0 * n4 - n1 * n3) / d;
+        auto u = 1. - v - w;
+
+        return u * normals_[0] + v * normals_[1] + (1 - u - v) * normals_[2];
+    }
+
+    structures::Vec3 Smooth_Triangle::normal(float u, float v) const
+    {
+        auto w = 1 - u - v;
+        return w * normals_[0] + u * normals_[1] + v * normals_[2];
     }
 
 } // namespace environment

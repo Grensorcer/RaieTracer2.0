@@ -12,7 +12,6 @@
 namespace environment
 {
     typedef std::tuple<display::Colour, double, double, double> components;
-
     struct intersection_record
     {
         double t;
@@ -92,10 +91,8 @@ namespace environment
                  const structures::Vec3 &a, const structures::Vec3 &b,
                  const structures::Vec3 &c)
             : Object(txt)
-            , a_{ a }
-            , b_{ b }
-            , c_{ c }
-            , normal_{ (b_ - a_) ^ (c_ - a_) }
+            , vertices_{ a, b, c }
+            , normal_{ (b - a) ^ (c - a) }
         {
             structures::unit(normal_);
         }
@@ -105,29 +102,90 @@ namespace environment
 
         structures::Vec3 reflect(const structures::Vec3 &p,
                                  const structures::Vec3 &n) const override;
+
         structures::Vec3 normal(const structures::Vec3 &p) const override;
+        virtual structures::Vec3 normal(float u, float v) const;
 
         const components
         get_components(const structures::Vec3 &p) const override;
 
-        const structures::Vec3 &a()
+        const structures::Vec3 &a() const
         {
-            return a_;
+            return vertices_[0];
         }
-        const structures::Vec3 &b()
+        const structures::Vec3 &b() const
         {
-            return b_;
+            return vertices_[1];
         }
-        const structures::Vec3 &c()
+        const structures::Vec3 &c() const
         {
-            return c_;
+            return vertices_[2];
+        }
+
+        const structures::Vec3 &normal() const
+        {
+            return normal_;
         }
 
     protected:
-        structures::Vec3 a_;
-        structures::Vec3 b_;
-        structures::Vec3 c_;
+        std::array<structures::Vec3, 3> vertices_;
         structures::Vec3 normal_;
+    };
+
+    class Smooth_Triangle : public Triangle
+    {
+    public:
+        Smooth_Triangle(std::shared_ptr<Texture_Material> txt,
+                        const structures::Vec3 &a, const structures::Vec3 &b,
+                        const structures::Vec3 &c)
+            : Triangle(txt, a, b, c)
+            , normals_{ normal_, normal_, normal_ }
+        {}
+
+        const structures::Vec3 &normal_a() const
+        {
+            return normals_[0];
+        }
+        const structures::Vec3 &normal_b() const
+        {
+            return normals_[1];
+        }
+        const structures::Vec3 &normal_c() const
+        {
+            return normals_[2];
+        }
+
+        void fix_normals(Smooth_Triangle &other)
+        {
+            for (short i = 0; i < 3; ++i)
+                for (short j = 0; j < 3; ++j)
+                    if (vertices_[i] == other.vertices_[j])
+                    {
+                        normals_[i] += other.normal_;
+                        other.normals_[j] += normal_;
+                        ++nb_share_;
+                        ++(other.nb_share_);
+                        break;
+                    }
+        }
+
+        void fix_normals()
+        {
+            normals_[0] /= nb_share_;
+            normals_[1] /= nb_share_;
+            normals_[2] /= nb_share_;
+        }
+
+        structures::Vec3 normal(const structures::Vec3 &p) const override;
+        structures::Vec3 normal(float u, float v) const override;
+        const structures::Vec3 &normal() const
+        {
+            return normal_;
+        }
+
+    protected:
+        std::array<structures::Vec3, 3> normals_;
+        size_t nb_share_ = 1;
     };
 
     class Plane : public Object

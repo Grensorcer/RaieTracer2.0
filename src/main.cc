@@ -18,7 +18,7 @@ int main()
     const size_t width = 640;
     const size_t height = width / aspect_ratio;
     auto im = display::Image(height, width);
-    constexpr size_t sample_per_pixel = 4;
+    constexpr size_t sample_per_pixel = 2;
     constexpr size_t nb_threads = 4;
 
     // Camera

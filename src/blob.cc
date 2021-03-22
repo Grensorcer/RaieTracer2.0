@@ -49,29 +49,35 @@ namespace environment
         return potential;
     }
 
-    void
-    Blob::build_triangles(const cube &c, std::array<int, 15> vertices,
-                          std::vector<std::shared_ptr<Triangle>> &triangles)
+    structures::Vec3 Blob::interpolate_vertex(size_t i1, size_t i2)
+    {
+        return (potentials_[i1] * points_[i1] + potentials_[i2] * points_[i2])
+            / (potentials_[i1] + potentials_[i2]);
+    }
+
+    void Blob::build_triangles(
+        const cube &c, std::array<int, 15> vertices,
+        std::vector<std::shared_ptr<Smooth_Triangle>> &triangles)
     {
         for (size_t i = 0; i < 15 && vertices[i] != -1; i += 3)
         {
-            auto v1 = (points_[c[std::get<1>(sides_[vertices[i]])]]
-                       + points_[c[std::get<0>(sides_[vertices[i]])]])
-                / 2;
-            auto v2 = (points_[c[std::get<1>(sides_[vertices[i + 1]])]]
-                       + points_[c[std::get<0>(sides_[vertices[i + 1]])]])
-                / 2;
-            auto v3 = (points_[c[std::get<1>(sides_[vertices[i + 2]])]]
-                       + points_[c[std::get<0>(sides_[vertices[i + 2]])]])
-                / 2;
-            auto triangle = std::make_shared<Triangle>(txt_, v1, v2, v3);
+            auto v1 = interpolate_vertex(c[std::get<1>(sides_[vertices[i]])],
+                                         c[std::get<0>(sides_[vertices[i]])]);
+            auto v2 =
+                interpolate_vertex(c[std::get<1>(sides_[vertices[i + 1]])],
+                                   c[std::get<0>(sides_[vertices[i + 1]])]);
+            auto v3 =
+                interpolate_vertex(c[std::get<1>(sides_[vertices[i + 2]])],
+                                   c[std::get<0>(sides_[vertices[i + 2]])]);
+
+            auto triangle = std::make_shared<Smooth_Triangle>(txt_, v1, v2, v3);
             triangles.emplace_back(triangle);
         }
     }
 
-    std::vector<std::shared_ptr<Triangle>> Blob::marching_cubes()
+    std::vector<std::shared_ptr<Smooth_Triangle>> Blob::marching_cubes()
     {
-        std::vector<std::shared_ptr<Triangle>> res;
+        std::vector<std::shared_ptr<Smooth_Triangle>> res;
         size_t n = side_ / step_;
         size_t n_cube = n * n * n;
         res.reserve(3 * n_cube);
@@ -88,6 +94,18 @@ namespace environment
             index |= get_potential(c[6]) > isosurface_ ? 64 : 0;
             index |= get_potential(c[7]) > isosurface_ ? 128 : 0;
             build_triangles(c, triangle_table_[index], res);
+        }
+
+        if (res.size() > 0)
+        {
+            for (size_t i = 0; i < res.size() - 1; ++i)
+            {
+                for (size_t j = i + 1; j < res.size(); ++j)
+                    if (res[i]->normal() != res[j]->normal())
+                        res[i]->fix_normals(*(res[j]));
+                res[i]->fix_normals();
+            }
+            res[res.size() - 1]->fix_normals();
         }
 
         return res;
