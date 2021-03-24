@@ -15,7 +15,7 @@ int main()
     // Image
     auto file = std::ofstream("test.ppm");
     const double aspect_ratio = 16. / 9.;
-    const size_t width = 640;
+    const size_t width = 1920;
     const size_t height = width / aspect_ratio;
     auto im = display::Image(height, width);
     constexpr size_t sample_per_pixel = 2;
@@ -28,7 +28,7 @@ int main()
     auto cam = environment::Camera(
         cam_origin, structures::Vec3({ { 0, 0, 1 } }),
         structures::Vec3({ { 0, -1, 0 } }), 1., v_fov, h_fov);
-    auto scene = environment::Scene(cam, 0.3);
+    auto scene = environment::Scene(cam, 0.4);
 
     environment::scene_blob(scene);
     auto stop_create = std::chrono::high_resolution_clock::now();

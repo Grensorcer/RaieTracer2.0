@@ -151,17 +151,17 @@ namespace environment
 
     Scene &scene_blob(Scene &s)
     {
-        auto b = Blob(std::make_shared<Uniform_Smooth>(
-                          display::Colour(0.9, 0.9, 0.4), 1., 0.3, 1.),
-                      structures::Vec3({ { 0, -4, 0 } }), 0.2, 4, 1);
-        b.add_energy(structures::Vec3({ { 1, -4, 0 } }));
-        b.add_energy(structures::Vec3({ { -1, -4, 0 } }));
+        auto b = Blob(std::make_shared<Uniform_Metal>(
+                          display::Colour(0.9, 0.9, 0.4), 1., 1., 1.),
+                      structures::Vec3({ { 0, -4, 0 } }), 0.15, 4, 0.5);
+        b.add_energy(structures::Vec3({ { 0.75, -4, 0.75 } }));
+        b.add_energy(structures::Vec3({ { -0.75, -4, 0 } }));
         auto triangles = b.marching_cubes();
 
         s.add_objects(triangles.begin(), triangles.end());
 
         s.add_object(std::make_shared<Sphere>(
-            structures::Vec3({ { 3, -3, 1 } }),
+            structures::Vec3({ { 0, -3, 4 } }),
             std::make_shared<Uniform_Metal>(display::Colour(0.2, 0.3, 0.7), 1.,
                                             0.5, 0.5),
             1.));
@@ -173,8 +173,7 @@ namespace environment
             structures::Vec3({ { 0, 0, 1 } })));
 
         s.add_light(std::make_shared<Point_Light>(
-
-            structures::Vec3({ { 1, -2, 3 } }), 1.5));
+            structures::Vec3({ { 3, 1, 3 } }), 1.5));
 
         return s;
     }

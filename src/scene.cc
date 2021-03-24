@@ -38,26 +38,28 @@ namespace environment
             auto light_ray =
                 Ray(intersection_point + light_dir * 0.05, light_dir);
             auto light_intersection = find_closest_intersection(light_ray);
-            if (light_intersection
-                && structures::norm(light_ray.at(light_intersection->t)
+            if (!light_intersection
+                || structures::norm(light_ray.at(light_intersection->t)
                                     - light_ray.origin())
-                    < light_distance)
-                continue;
-            // Diffusion
-            auto diff_angle = i_r.normal * light_dir;
-            if (diff_angle > 0)
-                diff += diff_angle * light->intensity() / light_distance;
-
-            // Specularity
-            auto s_sp = i_r.reflected * light_dir;
-            if (s_sp > 0)
+                    >= light_distance)
             {
-                // std::cout << "SPECU: " << s_sp << '\n';
-                // std::cout << "POW: " << std::get<3>(i_r.comps) << '\n';
-                // std::cout << "GIVES: " << pow(s_sp, std::get<3>(i_r.comps))
-                // << '\n';
-                spec += pow(s_sp, std::get<3>(i_r.comps)) * light->intensity()
-                    / light_distance;
+                // Diffusion
+                auto diff_angle = i_r.normal * light_dir;
+                if (diff_angle > 0)
+                    diff += diff_angle * light->intensity() / light_distance;
+
+                // Specularity
+                auto s_sp = i_r.reflected * light_dir;
+                if (s_sp > 0)
+                {
+                    // std::cout << "SPECU: " << s_sp << '\n';
+                    // std::cout << "POW: " << std::get<3>(i_r.comps) << '\n';
+                    // std::cout << "GIVES: " << pow(s_sp,
+                    // std::get<3>(i_r.comps))
+                    // << '\n';
+                    spec += pow(s_sp, std::get<3>(i_r.comps))
+                        * light->intensity() / light_distance;
+                }
             }
         }
 

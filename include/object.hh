@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cmath>
 #include <memory>
 #include <optional>
 #include <tuple>
@@ -92,9 +93,15 @@ namespace environment
                  const structures::Vec3 &c)
             : Object(txt)
             , vertices_{ a, b, c }
-            , normal_{ (b - a) ^ (c - a) }
         {
+            auto tmp_a = b - a;
+            auto tmp_b = c - a;
+            normal_ = tmp_a ^ tmp_b;
             structures::unit(normal_);
+            auto tmp_da = structures::norm(tmp_a);
+            auto tmp_db = structures::norm(tmp_b);
+            auto angle = std::acos((tmp_a * tmp_b) / (tmp_da * tmp_db));
+            area_ = ((tmp_a * tmp_b) * std::sin(angle)) / 2;
         }
 
         std::optional<intersection_record>
@@ -122,6 +129,11 @@ namespace environment
             return vertices_[2];
         }
 
+        const double &area() const
+        {
+            return area_;
+        }
+
         const structures::Vec3 &normal() const
         {
             return normal_;
@@ -130,6 +142,7 @@ namespace environment
     protected:
         std::array<structures::Vec3, 3> vertices_;
         structures::Vec3 normal_;
+        double area_;
     };
 
     class Smooth_Triangle : public Triangle
@@ -139,7 +152,7 @@ namespace environment
                         const structures::Vec3 &a, const structures::Vec3 &b,
                         const structures::Vec3 &c)
             : Triangle(txt, a, b, c)
-            , normals_{ normal_, normal_, normal_ }
+            , normals_{ normal_ * area_, normal_ * area_, normal_ * area_ }
         {}
 
         const structures::Vec3 &normal_a() const
@@ -161,19 +174,30 @@ namespace environment
                 for (short j = 0; j < 3; ++j)
                     if (vertices_[i] == other.vertices_[j])
                     {
-                        normals_[i] += other.normal_;
-                        other.normals_[j] += normal_;
-                        ++nb_share_;
-                        ++(other.nb_share_);
+                        /*
+                        auto e0 = vertices_[i] - vertices_[(i + 1) % 3];
+                        auto e1 = vertices_[i] - vertices_[(i + 2) % 3];
+                        auto angle = std::acos(
+                            (e0 * e1)
+                            / (structures::norm(e0) * structures::norm(e1)));
+
+                        auto e0_o = vertices_[j] - vertices_[(j + 1) % 3];
+                        auto e1_o = vertices_[j] - vertices_[(j + 2) % 3];
+                        auto angle_o = std::acos((e0_o * e1_o)
+                                                 / (structures::norm(e0_o)
+                                                    * structures::norm(e1_o)));
+                        */
+                        normals_[i] += other.normal_ * other.area_;
+                        other.normals_[j] += normal_ * area_;
                         break;
                     }
         }
 
         void fix_normals()
         {
-            normals_[0] /= nb_share_;
-            normals_[1] /= nb_share_;
-            normals_[2] /= nb_share_;
+            structures::unit(normals_[0]);
+            structures::unit(normals_[1]);
+            structures::unit(normals_[2]);
         }
 
         structures::Vec3 normal(const structures::Vec3 &p) const override;
@@ -185,7 +209,6 @@ namespace environment
 
     protected:
         std::array<structures::Vec3, 3> normals_;
-        size_t nb_share_ = 1;
     };
 
     class Plane : public Object
