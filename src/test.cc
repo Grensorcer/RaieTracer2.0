@@ -108,7 +108,7 @@ TEST(Matrix, ScalarProduct)
 {
     auto m1 = FixedMatrix<1, 4>::arange();
     auto m2 = FixedMatrix<4, 1>::arange();
-    auto res = FixedMatrix<1, 1>({ { 14 } });
+    auto res = FixedMatrix<1, 1>({ 14 });
     ASSERT_EQ(res, m1 * m2);
 }
 

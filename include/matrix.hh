@@ -21,6 +21,10 @@ namespace structures
         {
             std::copy(m.m().begin(), m.m().end(), m_.begin());
         };
+        FixedMatrix(const double (&arr)[H * W])
+        {
+            std::copy(arr, arr + (H * W), m_.begin());
+        }
         FixedMatrix(const double (&arr)[H][W])
         {
             for (size_t i = 0; i < H; ++i)
@@ -185,7 +189,7 @@ namespace structures
         alignas(16) std::array<double, (H * W)> m_ = {};
     };
 
-    using Vec3 = FixedMatrix<1ul, 3ul>;
+    using Vec3 = FixedMatrix<1, 3>;
 
     template <size_t H, size_t W>
     std::ostream &operator<<(std::ostream &os, const FixedMatrix<H, W> &m)
