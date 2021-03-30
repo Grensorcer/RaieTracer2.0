@@ -1,4 +1,6 @@
 #include "scene_collection.hh"
+#include "stl_reader.h"
+#include "object.hh"
 
 namespace environment
 {
@@ -157,6 +159,7 @@ namespace environment
         b.add_energy(structures::Vec3({ { 0.75, -4, 0.75 } }));
         b.add_energy(structures::Vec3({ { -0.75, -4, 0 } }));
         auto triangles = b.marching_cubes();
+        std::cout << triangles.size() << '\n';
 
         s.add_objects(triangles.begin(), triangles.end());
 
@@ -174,6 +177,48 @@ namespace environment
 
         s.add_light(std::make_shared<Point_Light>(
             structures::Vec3({ { 3, 1, 3 } }), 1.5));
+
+        return s;
+    }
+
+    Scene &scene_cup(Scene &s)
+    {
+        stl_reader::StlMesh <double, size_t> mesh("../data/rot_less_cup.stl");
+        auto t = std::make_shared<Uniform_Smooth>(display::Colour(0.3, 0.2, 0.6), 1., 1., 1.);
+        environment::mesh cup;
+        cup.reserve(21000);
+        for (size_t i = 0; i < mesh.num_tris(); ++i)
+        {
+            const double *c1 = mesh.tri_corner_coords(i, 0);
+            const double *c2 = mesh.tri_corner_coords(i, 1);
+            const double *c3 = mesh.tri_corner_coords(i, 2);
+            // const double *n = mesh.tri_normal(i);
+
+            auto triangle = std::make_shared<Triangle>(t, structures::Vec3({c1[0], c1[1] - 4, c1[2]}), structures::Vec3({c2[0], c2[1] - 4, c2[2]}), structures::Vec3({c3[0], c3[1] - 4, c3[2]}));
+            
+            cup.emplace_back(triangle);
+        }
+
+        std::cout << cup.size() << '\n';
+
+        s.add_mesh(cup);
+
+        /*
+        s.add_object(std::make_shared<Sphere>(
+            structures::Vec3({ { 0, -3, 4 } }),
+            std::make_shared<Uniform_Metal>(display::Colour(0.2, 0.3, 0.7), 1.,
+                                            0.5, 0.5),
+            1.));
+
+        s.add_object(std::make_shared<Plane>(
+            structures::Vec3({ { 0, 0, -2 } }),
+            std::make_shared<Uniform_Smooth>(display::Colour(0, 0.33, 0.1), 1.,
+                                             1., 1.),
+            structures::Vec3({ { 0, 0, 1 } })));
+            */
+
+        s.add_light(std::make_shared<Point_Light>(
+            structures::Vec3({ { -1, -1, 1 } }), 1.5));
 
         return s;
     }

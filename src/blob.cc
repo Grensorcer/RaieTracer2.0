@@ -100,7 +100,7 @@ namespace environment
         {
             for (size_t i = 0; i < res.size() - 1; ++i)
             {
-                std::cout << i << " out of " << res.size() << " triangles\r";
+                std::cout << '\r' << i << " out of " << res.size() << " triangles";
                 for (size_t j = i + 1; j < res.size(); ++j)
                     if (res[i]->normal() != res[j]->normal())
                         res[i]->fix_normals(*(res[j]));

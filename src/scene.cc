@@ -110,4 +110,9 @@ namespace environment
         lights_.emplace_back(l);
     }
 
+    void Scene::add_mesh(mesh &m)
+    {
+        add_objects(m.begin(), m.end());
+    }
+
 } // namespace environment
