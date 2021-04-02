@@ -13,7 +13,7 @@ namespace environment
         virtual structures::Vec3 reflect(const structures::Vec3 &p,
                                          const structures::Vec3 &n) const = 0;
         virtual std::tuple<display::Colour, double, double, double>
-        get_components(const structures::Vec3 &p) const = 0;
+        get_components(double u, double v) const = 0;
     };
 
     class Uniform_Texture : public Texture_Material
@@ -28,7 +28,7 @@ namespace environment
         {}
 
         std::tuple<display::Colour, double, double, double>
-        get_components(const structures::Vec3 &p) const override;
+        get_components(double u, double v) const override;
 
     protected:
         display::Colour c_;
@@ -56,5 +56,28 @@ namespace environment
         using Uniform_Texture::Uniform_Texture;
         structures::Vec3 reflect(const structures::Vec3 &p,
                                  const structures::Vec3 &n) const override;
+    };
+
+    class Image_Texture : public Texture_Material
+    {
+    public:
+        Image_Texture(const Image_Texture &txt) = default;
+        Image_Texture(const display::Image &im, double kd, double ks, double ns)
+            : im_{ im }
+            , kd_{ kd }
+            , ks_{ ks }
+            , ns_{ ns }
+        {}
+
+        std::tuple<display::Colour, double, double, double>
+        get_components(double u, double v) const override;
+        structures::Vec3 reflect(const structures::Vec3 &p,
+                                 const structures::Vec3 &n) const override;
+
+    private:
+        display::Image im_;
+        double kd_;
+        double ks_;
+        double ns_;
     };
 } // namespace environment

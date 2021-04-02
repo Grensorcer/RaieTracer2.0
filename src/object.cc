@@ -1,5 +1,7 @@
 #include "object.hh"
 
+#include <cmath>
+
 namespace environment
 {
     /* const structures::Vec3 Sphere::at(double i, double j) const
@@ -44,7 +46,7 @@ namespace environment
 
         res = std::make_optional<>(intersection_record{});
         res->t = t;
-        res->normal = normal(r.at(t));
+        res->normal = map_normal(r.at(t));
         res->comps = get_components(r.at(t));
         res->reflected = reflect(r.at(t), res->normal);
 
@@ -58,15 +60,30 @@ namespace environment
         return normal;
     }
 
+    structures::Vec3 Sphere::tangent(const structures::Vec3 &p) const
+    {
+        double phi = std::acos(-(p[1] - center_[1]) / r_);
+        return structures::Vec3({ -std::sin(phi), 0, std::cos(phi) });
+    }
+
     structures::Vec3 Sphere::reflect(const structures::Vec3 &p,
                                      const structures::Vec3 &n) const
     {
         return txt_->reflect(p, n);
     }
 
+    structures::Vec3 Sphere::map_normal(const structures::Vec3 &p) const
+    {
+        auto t = tangent(p);
+        auto n = normal(p);
+        return map_->normal(n, t, n ^ t, );
+    }
+
     const components Sphere::get_components(const structures::Vec3 &p) const
     {
-        return txt_->get_components(p);
+        double theta = std::atan2(-(p[2] - center_[2]), p[0] - center_[0]);
+        double phi = std::acos(-(p[1] - center_[1]) / r_);
+        return txt_->get_components((theta + M_PI) / (2 * M_PI), phi / M_PI);
     }
 
     std::optional<intersection_record> Plane::intersection(const Ray &r) const
@@ -80,7 +97,7 @@ namespace environment
             return res;
         res = std::make_optional<>(intersection_record{});
         res->t = t;
-        res->normal = normal(r.at(t));
+        res->normal = map_normal(r.at(t));
         res->comps = get_components(r.at(t));
         res->reflected = reflect(r.at(t), res->normal);
 
@@ -99,9 +116,21 @@ namespace environment
         return normal_;
     }
 
+    structures::Vec3 Plane::tangent(const structures::Vec3 &p) const
+    {
+        // TODO
+        return structures::Vec3();
+    }
+
+    structures::Vec3 Plane::map_normal(const structures::Vec3 &p) const
+    {
+        // TODO
+        return normal(p);
+    }
+
     const components Plane::get_components(const structures::Vec3 &p) const
     {
-        return txt_->get_components(p);
+        return txt_->get_components(0, 0);
     }
 
     std::optional<intersection_record>
@@ -131,7 +160,7 @@ namespace environment
             return res;
 
         structures::Vec3 i = r.at(t);
-        structures::Vec3 n = normal(u, v);
+        structures::Vec3 n = map_normal(u, v);
         n = n * r.direction() >= 0 ? -n : n;
         res = std::make_optional<>(intersection_record{});
         res->t = t;
@@ -152,6 +181,13 @@ namespace environment
         (void)p;
         return normal_;
     }
+
+    structures::Vec3 Triangle::tangent(const structures::Vec3 &p) const
+    {
+        // TODO
+        return structures::Vec3();
+    }
+
     structures::Vec3 Triangle::normal(float u, float v) const
     {
         (void)u;
@@ -159,9 +195,21 @@ namespace environment
         return normal_;
     }
 
+    structures::Vec3 Triangle::map_normal(const structures::Vec3 &p) const
+    {
+        // TODO
+        return normal(p);
+    }
+
+    structures::Vec3 Triangle::map_normal(float u, float v) const
+    {
+        // TODO
+        return normal(u, v);
+    }
+
     const components Triangle::get_components(const structures::Vec3 &p) const
     {
-        return txt_->get_components(p);
+        return txt_->get_components(0, 0);
     }
 
     structures::Vec3 Smooth_Triangle::normal(const structures::Vec3 &p) const
@@ -183,10 +231,23 @@ namespace environment
         return u * normals_[0] + v * normals_[1] + (1 - u - v) * normals_[2];
     }
 
+    structures::Vec3
+    Smooth_Triangle::map_normal(const structures::Vec3 &p) const
+    {
+        // TODO
+        return normal(p);
+    }
+
     structures::Vec3 Smooth_Triangle::normal(float u, float v) const
     {
         auto w = 1 - u - v;
         return w * normals_[0] + u * normals_[1] + v * normals_[2];
+    }
+
+    structures::Vec3 Smooth_Triangle::map_normal(float u, float v) const
+    {
+        // TODO
+        return normal(u, v);
     }
 
 } // namespace environment

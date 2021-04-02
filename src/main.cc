@@ -13,7 +13,6 @@ int raytracer()
 {
     auto start = std::chrono::high_resolution_clock::now();
     // Image
-    auto file = std::ofstream("test.ppm");
     const double aspect_ratio = 16. / 9.;
     const size_t width = 640;
     const size_t height = width / aspect_ratio;
@@ -30,7 +29,7 @@ int raytracer()
         structures::Vec3({ { 0, -1, 0 } }), 1., v_fov, h_fov);
     auto scene = environment::Scene(cam, 0.4);
 
-    environment::scene_cup(scene);
+    environment::scene_mesh(scene);
     auto stop_create = std::chrono::high_resolution_clock::now();
     auto time_create =
         std::chrono::duration_cast<std::chrono::seconds>(stop_create - start);
@@ -52,7 +51,7 @@ int raytracer()
                             / (height - 1),
                         (static_cast<double>(j) + utils::random_double())
                             / (width - 1));
-                    color += scene.cast_ray(ray, 4);
+                    color += scene.cast_ray(ray, 8);
                 }
 
                 im.set_pixel(i, j, color / sample_per_pixel);
@@ -70,6 +69,7 @@ int raytracer()
     std::cout << "Time taken to render: " << time_render.count() << " seconds"
               << '\n';
 
+    auto file = std::ofstream("test.ppm");
     file << im;
     return 0;
 }

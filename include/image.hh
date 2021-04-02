@@ -12,16 +12,9 @@ namespace display
     public:
         Colour() = default;
         Colour(const Colour &c) = default;
-        Colour(const double (&rgb)[3])
-        {
-            std::copy(rgb, rgb + 3, rgb_);
-        }
-        Colour(double r, double g, double b)
-        {
-            rgb_[0] = r;
-            rgb_[1] = g;
-            rgb_[2] = b;
-        }
+        Colour(const double (&rgb)[3]);
+        Colour(double r, double g, double b);
+        Colour(const unsigned char *c);
 
         const double &r() const
         {
@@ -62,12 +55,8 @@ namespace display
         using PixelTable = std::vector<Colour>;
         Image() = delete;
         Image(const Image &i) = default;
-        Image(size_t height, size_t width)
-            : width_{ width }
-            , height_{ height }
-        {
-            pixels_ = std::vector<Colour>(height * width);
-        }
+        Image(size_t height, size_t width);
+        Image(const char *file);
 
         inline const Colour &get_pixel(size_t i, size_t j) const
         {
@@ -79,6 +68,8 @@ namespace display
             pixels_[j + i * width_] = c;
         }
 
+        const size_t &width() const;
+        const size_t &height() const;
         Image &operator+=(const Image &im);
         Image &operator/=(double d);
         friend std::ostream &operator<<(std::ostream &os, const Image &i);

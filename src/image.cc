@@ -1,9 +1,28 @@
 #include "image.hh"
 
 #include "utils.hh"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 namespace display
 {
+    Colour::Colour(const double (&rgb)[3])
+    {
+        std::copy(rgb, rgb + 3, rgb_);
+    }
+    Colour::Colour(double r, double g, double b)
+    {
+        rgb_[0] = r;
+        rgb_[1] = g;
+        rgb_[2] = b;
+    }
+    Colour::Colour(const unsigned char *c)
+    {
+        rgb_[0] = (double)c[0] / 255.;
+        rgb_[1] = (double)c[1] / 255.;
+        rgb_[2] = (double)c[2] / 255.;
+    }
+
     Colour &Colour::operator=(const Colour &c)
     {
         rgb_[0] = c.r();
@@ -89,6 +108,33 @@ namespace display
                   << static_cast<int>(256 * std::clamp(c.g(), 0., 0.999999))
                   << ' '
                   << static_cast<int>(256 * std::clamp(c.b(), 0., 0.999999));
+    }
+
+    const size_t &Image::width() const
+    {
+        return width_;
+    }
+    const size_t &Image::height() const
+    {
+        return height_;
+    }
+
+    Image::Image(size_t height, size_t width)
+        : width_{ width }
+        , height_{ height }
+    {
+        pixels_ = std::vector<Colour>(height * width);
+    }
+    Image::Image(const char *file)
+    {
+        int width, height, n;
+        unsigned char *data = stbi_load(file, &width, &height, &n, 3);
+        width_ = width;
+        height_ = height;
+        pixels_.reserve(width * height);
+        for (int i = 0; i < width * height; ++i)
+            pixels_.emplace_back(data + (3 * i));
+        stbi_image_free(data);
     }
 
     Image &Image::operator+=(const Image &rhs)

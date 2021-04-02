@@ -54,11 +54,13 @@ namespace environment
             for (auto i = begin; i != end; ++i)
                 objects_.push_back(*i);
         }
+        void add_mesh(mesh &m);
         void add_light(std::shared_ptr<Light> l);
 
     private:
         Camera cam_;
         std::vector<std::shared_ptr<Object>> objects_;
+        std::vector<mesh> meshes_;
         std::vector<std::shared_ptr<Light>> lights_;
         double ambiant_light_ = 1.;
     };

@@ -1,3 +1,4 @@
+#pragma once
 #include "scene.hh"
 
 namespace environment
@@ -9,4 +10,6 @@ namespace environment
     Scene &scene_sphere_reflect(Scene &s);
     Scene &scene_sphere_triangle_reflect(Scene &s);
     Scene &scene_blob(Scene &s);
+    Scene &scene_mesh(Scene &s);
+    Scene &scene_sphere_texture_reflect(Scene &s);
 } // namespace environment
