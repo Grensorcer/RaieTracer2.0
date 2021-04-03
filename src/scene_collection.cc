@@ -230,16 +230,17 @@ namespace environment
     {
         s.add_object(std::make_shared<Sphere>(
             structures::Vec3({ 1.5, -2, 0 }),
-            std::make_shared<Image_Texture>("../data/dirt_texture.jpg", 1., 0.,
-                                            0.),
+            std::make_shared<Image_Texture>(
+                "../data/Metal_Gate_002_basecolor.jpg", 1., 0.7, 0.7),
+            std::make_shared<Normal_Map>("../data/Metal_Gate_002_normal.jpg"),
             1.));
         s.add_object(std::make_shared<Sphere>(
             structures::Vec3({ -1.5, -2, 0 }),
-            std::make_shared<Uniform_Metal>(display::Colour(0.9, 0.9, 0.8), 1.,
-                                            0.5, 0.5),
+            std::make_shared<Uniform_Metal>(display::Colour(0.5, 0.5, 0.5), 1.,
+                                            0.01, 0.01),
             1.));
         s.add_light(
-            std::make_shared<Point_Light>(structures::Vec3({ 0, -1, 3 }), 1.));
+            std::make_shared<Point_Light>(structures::Vec3({ -3, -1, 3 }), 3.));
 
         return s;
     }

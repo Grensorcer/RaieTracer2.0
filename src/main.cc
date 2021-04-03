@@ -14,11 +14,11 @@ int raytracer()
     auto start = std::chrono::high_resolution_clock::now();
     // Image
     const double aspect_ratio = 16. / 9.;
-    const size_t width = 640;
+    const size_t width = 1920;
     const size_t height = width / aspect_ratio;
     auto im = display::Image(height, width);
-    constexpr size_t sample_per_pixel = 1;
-    constexpr size_t nb_threads = 7;
+    constexpr size_t sample_per_pixel = 8;
+    constexpr size_t nb_threads = 4;
 
     // Camera
     auto cam_origin = structures::Vec3({ 0, 0, 0 });
@@ -27,9 +27,9 @@ int raytracer()
     auto cam = environment::Camera(
         cam_origin, structures::Vec3({ { 0, 0, 1 } }),
         structures::Vec3({ { 0, -1, 0 } }), 1., v_fov, h_fov);
-    auto scene = environment::Scene(cam, 0.4);
+    auto scene = environment::Scene(cam, 0.3);
 
-    environment::scene_mesh(scene);
+    environment::scene_sphere_texture_reflect(scene);
     auto stop_create = std::chrono::high_resolution_clock::now();
     auto time_create =
         std::chrono::duration_cast<std::chrono::seconds>(stop_create - start);

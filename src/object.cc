@@ -43,10 +43,11 @@ namespace environment
                                                                       : sol1;
         if (t < 0)
             return res;
+        auto m_n = map_normal(r.at(t));
 
         res = std::make_optional<>(intersection_record{});
         res->t = t;
-        res->normal = map_normal(r.at(t));
+        res->normal = m_n;
         res->comps = get_components(r.at(t));
         res->reflected = reflect(r.at(t), res->normal);
 
@@ -63,7 +64,9 @@ namespace environment
     structures::Vec3 Sphere::tangent(const structures::Vec3 &p) const
     {
         double phi = std::acos(-(p[1] - center_[1]) / r_);
-        return structures::Vec3({ -std::sin(phi), 0, std::cos(phi) });
+        auto res = structures::Vec3({ -std::sin(phi), 0, std::cos(phi) });
+        structures::unit(res);
+        return res;
     }
 
     structures::Vec3 Sphere::reflect(const structures::Vec3 &p,
@@ -76,7 +79,10 @@ namespace environment
     {
         auto t = tangent(p);
         auto n = normal(p);
-        return map_->normal(n, t, n ^ t, );
+        double theta = std::atan2(-(p[2] - center_[2]), p[0] - center_[0]);
+        double phi = std::acos(-(p[1] - center_[1]) / r_);
+        return map_->normal(n, t, n ^ t, (theta + M_PI) / (2 * M_PI),
+                            phi / M_PI);
     }
 
     const components Sphere::get_components(const structures::Vec3 &p) const

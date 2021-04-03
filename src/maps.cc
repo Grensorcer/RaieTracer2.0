@@ -18,7 +18,7 @@ namespace environment
     {
         auto colour = im_.get_pixel(u * im_.width(), v * im_.height());
         return structures::Vec3(
-            { colour.r() * 2 - 1, (colour.b() - 0.5) * 2, colour.g() * 2 - 1 });
+            { colour.r() * 2 - 1, colour.g() * 2 - 1, (colour.b() - 0.5) * 2 });
     }
 
     structures::Vec3 Normal_Map::normal(const structures::Vec3 &n,
