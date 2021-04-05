@@ -1,18 +1,10 @@
 #include "object.hh"
 
 #include <cmath>
+#include <numeric>
 
 namespace environment
 {
-    /* const structures::Vec3 Sphere::at(double i, double j) const
-    {
-        return center()
-            + radius()
-            * structures::Vec3(
-                  { { cos(i) * cos(j), cos(i) * sin(j), sin(j) } });
-    }
-    */
-
     std::optional<intersection_record> Sphere::intersection(const Ray &r) const
     {
         // Translation on ray to center on the sphere
@@ -43,15 +35,28 @@ namespace environment
                                                                       : sol1;
         if (t < 0)
             return res;
-        auto m_n = map_normal(r.at(t));
+        auto i = r.at(t);
+        auto u_v = parametrics(i);
+        auto sphere_normal = normal(i);
+        auto sphere_tangent = tangent(u_v.second);
+        auto m_n =
+            map_normal(sphere_normal, sphere_tangent, u_v.first, u_v.second);
 
         res = std::make_optional<>(intersection_record{});
         res->t = t;
         res->normal = m_n;
-        res->comps = get_components(r.at(t));
-        res->reflected = reflect(r.at(t), res->normal);
+        res->comps = get_components(u_v.first, u_v.second);
+        res->reflected = reflect(i, res->normal);
 
         return res;
+    }
+
+    std::pair<double, double>
+    Sphere::parametrics(const structures::Vec3 &p) const
+    {
+        double theta = std::atan2(-(p[2] - center_[2]), p[0] - center_[0]);
+        double phi = std::acos(-(p[1] - center_[1]) / r_);
+        return std::make_pair<>(theta, phi);
     }
 
     structures::Vec3 Sphere::normal(const structures::Vec3 &p) const
@@ -61,10 +66,9 @@ namespace environment
         return normal;
     }
 
-    structures::Vec3 Sphere::tangent(const structures::Vec3 &p) const
+    structures::Vec3 Sphere::tangent(double v) const
     {
-        double phi = std::acos(-(p[1] - center_[1]) / r_);
-        auto res = structures::Vec3({ -std::sin(phi), 0, std::cos(phi) });
+        auto res = structures::Vec3({ -std::sin(v), 0, std::cos(v) });
         structures::unit(res);
         return res;
     }
@@ -75,21 +79,16 @@ namespace environment
         return txt_->reflect(p, n);
     }
 
-    structures::Vec3 Sphere::map_normal(const structures::Vec3 &p) const
+    structures::Vec3 Sphere::map_normal(const structures::Vec3 &n,
+                                        const structures::Vec3 &t, double u,
+                                        double v) const
     {
-        auto t = tangent(p);
-        auto n = normal(p);
-        double theta = std::atan2(-(p[2] - center_[2]), p[0] - center_[0]);
-        double phi = std::acos(-(p[1] - center_[1]) / r_);
-        return map_->normal(n, t, n ^ t, (theta + M_PI) / (2 * M_PI),
-                            phi / M_PI);
+        return map_->normal(n, t, n ^ t, (u + M_PI) / (2 * M_PI), v / M_PI);
     }
 
-    const components Sphere::get_components(const structures::Vec3 &p) const
+    const components Sphere::get_components(double u, double v) const
     {
-        double theta = std::atan2(-(p[2] - center_[2]), p[0] - center_[0]);
-        double phi = std::acos(-(p[1] - center_[1]) / r_);
-        return txt_->get_components((theta + M_PI) / (2 * M_PI), phi / M_PI);
+        return txt_->get_components((u + M_PI) / (2 * M_PI), v / M_PI);
     }
 
     std::optional<intersection_record> Plane::intersection(const Ray &r) const
@@ -118,6 +117,7 @@ namespace environment
 
     structures::Vec3 Plane::normal(const structures::Vec3 &p) const
     {
+        // TODO
         (void)p;
         return normal_;
     }
@@ -136,6 +136,7 @@ namespace environment
 
     const components Plane::get_components(const structures::Vec3 &p) const
     {
+        // TODO
         return txt_->get_components(0, 0);
     }
 
@@ -171,7 +172,7 @@ namespace environment
         res = std::make_optional<>(intersection_record{});
         res->t = t;
         res->normal = n;
-        res->comps = get_components(i);
+        res->comps = get_components(u, v);
         res->reflected = reflect(i, n);
 
         return res;
@@ -182,78 +183,109 @@ namespace environment
     {
         return txt_->reflect(p, n);
     }
-    structures::Vec3 Triangle::normal(const structures::Vec3 &p) const
+
+    structures::Vec3 Triangle::tangent(double u, double v) const
     {
-        (void)p;
-        return normal_;
+        (void)u;
+        (void)v;
+        return vertices_[1];
     }
 
-    structures::Vec3 Triangle::tangent(const structures::Vec3 &p) const
-    {
-        // TODO
-        return structures::Vec3();
-    }
-
-    structures::Vec3 Triangle::normal(float u, float v) const
+    structures::Vec3 Triangle::normal(double u, double v) const
     {
         (void)u;
         (void)v;
         return normal_;
     }
 
-    structures::Vec3 Triangle::map_normal(const structures::Vec3 &p) const
+    structures::Vec3 Triangle::map_normal(double u, double v) const
     {
-        // TODO
-        return normal(p);
+        auto n = normal(u, v);
+        auto t = tangent(u, v);
+        return map_->normal(n, t, n ^ t, u, v);
     }
 
-    structures::Vec3 Triangle::map_normal(float u, float v) const
+    const components Triangle::get_components(double u, double v) const
     {
-        // TODO
-        return normal(u, v);
+        return txt_->get_components(u, v);
     }
 
-    const components Triangle::get_components(const structures::Vec3 &p) const
-    {
-        return txt_->get_components(0, 0);
-    }
-
-    structures::Vec3 Smooth_Triangle::normal(const structures::Vec3 &p) const
-    {
-        auto e0 = vertices_[1] - vertices_[0];
-        auto e1 = vertices_[2] - vertices_[0];
-        auto e2 = p - vertices_[0];
-        float n0 = e0 * e0;
-        float n1 = e0 * e1;
-        float n2 = e1 * e1;
-        float n3 = e2 * e0;
-        float n4 = e2 * e1;
-        float d = n0 * n2 - n1 * n1;
-
-        auto v = (n2 * n3 - n1 * n4) / d;
-        auto w = (n0 * n4 - n1 * n3) / d;
-        auto u = 1. - v - w;
-
-        return u * normals_[0] + v * normals_[1] + (1 - u - v) * normals_[2];
-    }
-
-    structures::Vec3
-    Smooth_Triangle::map_normal(const structures::Vec3 &p) const
-    {
-        // TODO
-        return normal(p);
-    }
-
-    structures::Vec3 Smooth_Triangle::normal(float u, float v) const
+    structures::Vec3 Smooth_Triangle::normal(double u, double v) const
     {
         auto w = 1 - u - v;
         return w * normals_[0] + u * normals_[1] + v * normals_[2];
     }
 
-    structures::Vec3 Smooth_Triangle::map_normal(float u, float v) const
+    Mesh::Mesh(std::shared_ptr<Texture_Material> txt, const char *pth,
+               structures::Vec3 center, double bb_radius)
+        : Object(txt)
+        , bounding_box_{ std::make_shared<Sphere>(center, txt, bb_radius) }
     {
-        // TODO
-        return normal(u, v);
+        stl_reader::StlMesh<double, size_t> m(pth);
+        triangles_.reserve(m.num_tris());
+        for (size_t i = 0; i < m.num_tris(); ++i)
+        {
+            const double *c1 = m.tri_corner_coords(i, 0);
+            const double *c2 = m.tri_corner_coords(i, 1);
+            const double *c3 = m.tri_corner_coords(i, 2);
+
+            auto triangle = std::make_shared<Triangle>(
+                txt, structures::Vec3({ c1[0], c1[1], c1[2] }) + center,
+                structures::Vec3({ c2[0], c2[1], c2[2] }) + center,
+                structures::Vec3({ c3[0], c3[1], c3[2] }) + center);
+
+            triangles_.emplace_back(triangle);
+        }
+    }
+
+    Mesh::Mesh(std::shared_ptr<Texture_Material> txt, std::shared_ptr<Map> nmap,
+               const char *pth, structures::Vec3 center, double bb_radius)
+        : Object(txt, nmap)
+        , bounding_box_{ std::make_shared<Sphere>(center, txt, nmap,
+                                                  bb_radius) }
+    {
+        stl_reader::StlMesh<double, size_t> m(pth);
+        triangles_.reserve(m.num_tris());
+        for (size_t i = 0; i < m.num_tris(); ++i)
+        {
+            const double *c1 = m.tri_corner_coords(i, 0);
+            const double *c2 = m.tri_corner_coords(i, 1);
+            const double *c3 = m.tri_corner_coords(i, 2);
+
+            auto triangle = std::make_shared<Triangle>(
+                txt, nmap, structures::Vec3({ c1[0], c1[1], c1[2] }) + center,
+                structures::Vec3({ c2[0], c2[1], c2[2] }) + center,
+                structures::Vec3({ c3[0], c3[1], c3[2] }) + center);
+
+            triangles_.emplace_back(triangle);
+        }
+    }
+
+    std::optional<intersection_record> Mesh::intersection(const Ray &r) const
+    {
+        std::optional<intersection_record> res;
+        if (!bounding_box_->intersection(r))
+            return res;
+
+        auto intersection_records =
+            std::vector<std::optional<environment::intersection_record>>();
+
+        std::transform(
+            triangles_.begin(), triangles_.end(),
+            std::back_inserter(intersection_records),
+            [r](const auto &object) { return object->intersection(r); });
+
+        res = std::reduce(
+            intersection_records.begin(), intersection_records.end(),
+            std::optional<environment::intersection_record>(std::nullopt),
+            [](auto &l_ir, auto &r_ir) {
+                auto res = l_ir;
+                if (!l_ir || (r_ir && r_ir->t < l_ir->t))
+                    res = r_ir;
+                return res;
+            });
+
+        return res;
     }
 
 } // namespace environment

@@ -15,6 +15,19 @@ namespace environment
         Blob(std::shared_ptr<Texture_Material> txt,
              const structures::Vec3 &center, double step, double side,
              double isosurface);
+        Blob(std::shared_ptr<Texture_Material> txt, std::shared_ptr<Map> nmap,
+             const structures::Vec3 &center, double step, double side,
+             double isosurface);
+
+        const double &side() const
+        {
+            return side_;
+        }
+
+        const structures::Vec3 &center() const
+        {
+            return center_;
+        }
 
         inline double get_potential(size_t idx)
         {
@@ -68,10 +81,11 @@ namespace environment
             const cube &c, std::array<int, 15> vertices,
             std::vector<std::shared_ptr<Smooth_Triangle>> &triangles);
 
-        std::vector<std::shared_ptr<Smooth_Triangle>> marching_cubes();
+        std::shared_ptr<Mesh> marching_cubes();
 
     protected:
         std::shared_ptr<Texture_Material> txt_;
+        std::shared_ptr<Map> nmap_;
         structures::Vec3 center_;
         double step_;
         double side_;

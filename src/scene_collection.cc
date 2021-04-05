@@ -50,12 +50,15 @@ namespace environment
     Scene &scene_triangles(Scene &s)
     {
         size_t nb = 6;
+        auto txt = std::make_shared<Image_Texture>(
+            "../data/Paper_Wrinkled_001_basecolor.jpg", 1., 1., 1.);
+        auto n_m = std::make_shared<Normal_Map>(
+            "../data/Paper_Wrinkled_001_normal.jpg");
         for (size_t k = 0; k < nb; ++k)
             for (size_t i = 0; i < nb; ++i)
                 for (size_t j = 0; j < nb; ++j)
                     s.add_object(std::make_shared<Triangle>(
-                        std::make_shared<Uniform_Smooth>(
-                            display::Colour(0.2, 0.3, 0.7), 1., 1., 1.),
+                        txt, n_m,
                         structures::Vec3({ { 2. - i, -(4. + k), 2. - j } }),
                         structures::Vec3({ { 2. - i, -(4. + k), 3. - j } }),
                         structures::Vec3({ { 3. - i, -(4. + k), 2. - j } })));
@@ -70,13 +73,18 @@ namespace environment
 
     Scene &scene_smooth_triangles(Scene &s)
     {
+        auto txt = std::make_shared<Uniform_Smooth>(
+            display::Colour(0.5, 0.1, 0.5), 1., 1., 1.);
+        // auto txt = std::make_shared<Image_Texture>(
+        //    "../data/Paper_Wrinkled_001_basecolor.jpg", 1., 1., 1.);
+        auto n_m = std::make_shared<Normal_Map>(
+            "../data/Paper_Wrinkled_001_normal.jpg");
         size_t nb = 6;
         for (size_t k = 0; k < nb; ++k)
             for (size_t i = 0; i < nb; ++i)
                 for (size_t j = 0; j < nb; ++j)
                     s.add_object(std::make_shared<Smooth_Triangle>(
-                        std::make_shared<Uniform_Smooth>(
-                            display::Colour(0.2, 0.3, 0.7), 1., 1., 1.),
+                        txt,
                         structures::Vec3({ { 2. - i, -(4. + k), 2. - j } }),
                         structures::Vec3({ { 2. - i, -(4. + k), 3. - j } }),
                         structures::Vec3({ { 3. - i, -(4. + k), 2. - j } })));
@@ -154,19 +162,21 @@ namespace environment
 
     Scene &scene_blob(Scene &s)
     {
-        auto b = Blob(std::make_shared<Uniform_Metal>(
-                          display::Colour(0.9, 0.9, 0.4), 1., 1., 1.),
-                      structures::Vec3({ { 0, -4, 0 } }), 0.15, 4, 0.5);
+        auto txt = std::make_shared<Image_Texture>(
+            "../data/Paper_Wrinkled_001_basecolor.jpg", 1., 1., 1.);
+        auto n_m = std::make_shared<Normal_Map>(
+            "../data/Paper_Wrinkled_001_normal.jpg");
+        auto b =
+            Blob(txt, n_m, structures::Vec3({ { 0, -4, 0 } }), 0.15, 4, 0.5);
         b.add_energy(structures::Vec3({ { 0.75, -4, 0.75 } }));
         b.add_energy(structures::Vec3({ { -0.75, -4, 0 } }));
-        auto triangles = b.marching_cubes();
-        std::cout << triangles.size() << '\n';
+        auto blob_mesh = b.marching_cubes();
 
-        s.add_objects(triangles.begin(), triangles.end());
+        s.add_object(blob_mesh);
 
         s.add_object(std::make_shared<Sphere>(
-            structures::Vec3({ { 0, -3, 4 } }),
-            std::make_shared<Uniform_Metal>(display::Colour(0.2, 0.3, 0.7), 1.,
+            structures::Vec3({ { 2, 2, 2 } }),
+            std::make_shared<Uniform_Metal>(display::Colour(0.5, 0.5, 0.5), 1.,
                                             0.5, 0.5),
             1.));
 
@@ -177,40 +187,28 @@ namespace environment
             structures::Vec3({ { 0, 0, 1 } })));
 
         s.add_light(std::make_shared<Point_Light>(
-            structures::Vec3({ { 3, 1, 3 } }), 1.5));
+            structures::Vec3({ { 2, 0, 3 } }), 2));
 
         return s;
     }
 
     Scene &scene_mesh(Scene &s)
     {
-        stl_reader::StlMesh<double, size_t> mesh("../data/froggy.stl");
-        auto t = std::make_shared<Uniform_Smooth>(
-            display::Colour(0.3, 0.8, 0.3), 1., 0.7, 0.7);
-        environment::mesh cup;
-        cup.reserve(11000);
-        for (size_t i = 0; i < mesh.num_tris(); ++i)
-        {
-            const double *c1 = mesh.tri_corner_coords(i, 0);
-            const double *c2 = mesh.tri_corner_coords(i, 1);
-            const double *c3 = mesh.tri_corner_coords(i, 2);
-            // const double *n = mesh.tri_normal(i);
+        auto txt = std::make_shared<Image_Texture>(
+            "../data/Paper_Wrinkled_001_basecolor.jpg", 1., 1., 1.);
+        auto n_m = std::make_shared<Normal_Map>(
+            "../data/Paper_Wrinkled_001_normal.jpg");
+        auto cup =
+            std::make_shared<Mesh>(txt, n_m, "../data/froggy_less.stl",
+                                   structures::Vec3({ 0, -3, 0 }), 1.862);
 
-            auto triangle = std::make_shared<Triangle>(
-                t, structures::Vec3({ c1[0], c1[1] - 4, c1[2] }),
-                structures::Vec3({ c2[0], c2[1] - 4, c2[2] }),
-                structures::Vec3({ c3[0], c3[1] - 4, c3[2] }));
-
-            cup.emplace_back(triangle);
-        }
-
-        s.add_mesh(cup);
+        s.add_object(cup);
 
         s.add_object(std::make_shared<Sphere>(
             structures::Vec3({ { 4, -3, 1 } }),
-            std::make_shared<Uniform_Metal>(display::Colour(0.2, 0.3, 0.3), 1.,
+            std::make_shared<Uniform_Metal>(display::Colour(0.5, 0.5, 0.5), 1.,
                                             0.5, 0.5),
-            1.));
+            n_m, 1.));
 
         /*
         s.add_object(std::make_shared<Plane>(

@@ -9,6 +9,7 @@
 #include "maps.hh"
 #include "matrix.hh"
 #include "ray.hh"
+#include "stl_reader.h"
 #include "texture.hh"
 
 namespace environment
@@ -38,14 +39,6 @@ namespace environment
         virtual ~Object() = default;
         virtual std::optional<intersection_record>
         intersection(const Ray &r) const = 0;
-        virtual structures::Vec3 normal(const structures::Vec3 &p) const = 0;
-        virtual structures::Vec3 tangent(const structures::Vec3 &p) const = 0;
-        virtual structures::Vec3
-        map_normal(const structures::Vec3 &p) const = 0;
-        virtual structures::Vec3 reflect(const structures::Vec3 &p,
-                                         const structures::Vec3 &n) const = 0;
-        virtual const components
-        get_components(const structures::Vec3 &p) const = 0;
 
     protected:
         std::shared_ptr<Texture_Material> txt_;
@@ -81,17 +74,20 @@ namespace environment
         intersection(const Ray &r) const override;
 
         structures::Vec3 reflect(const structures::Vec3 &p,
-                                 const structures::Vec3 &n) const override;
-        structures::Vec3 normal(const structures::Vec3 &p) const override;
-        structures::Vec3 tangent(const structures::Vec3 &p) const override;
-        structures::Vec3 map_normal(const structures::Vec3 &p) const override;
+                                 const structures::Vec3 &n) const;
+        std::pair<double, double> parametrics(const structures::Vec3 &p) const;
+        structures::Vec3 normal(const structures::Vec3 &p) const;
+        structures::Vec3 tangent(double v) const;
+        structures::Vec3 map_normal(const structures::Vec3 &n,
+                                    const structures::Vec3 &t, double u,
+                                    double v) const;
+
+        const components get_components(double u, double v) const;
+
         const structures::Vec3 &center() const
         {
             return center_;
         }
-
-        const components
-        get_components(const structures::Vec3 &p) const override;
 
     protected:
         double r_;
@@ -137,16 +133,13 @@ namespace environment
         intersection(const Ray &r) const override;
 
         structures::Vec3 reflect(const structures::Vec3 &p,
-                                 const structures::Vec3 &n) const override;
+                                 const structures::Vec3 &n) const;
 
-        structures::Vec3 normal(const structures::Vec3 &p) const override;
-        structures::Vec3 tangent(const structures::Vec3 &p) const override;
-        structures::Vec3 map_normal(const structures::Vec3 &p) const override;
-        virtual structures::Vec3 normal(float u, float v) const;
-        virtual structures::Vec3 map_normal(float u, float v) const;
+        virtual structures::Vec3 normal(double u, double v) const;
+        virtual structures::Vec3 tangent(double u, double v) const;
+        virtual structures::Vec3 map_normal(double u, double v) const;
 
-        const components
-        get_components(const structures::Vec3 &p) const override;
+        const components get_components(double u, double v) const;
 
         const structures::Vec3 &a() const
         {
@@ -238,10 +231,8 @@ namespace environment
             structures::unit(normals_[2]);
         }
 
-        structures::Vec3 normal(const structures::Vec3 &p) const override;
-        structures::Vec3 map_normal(const structures::Vec3 &p) const override;
-        structures::Vec3 normal(float u, float v) const override;
-        structures::Vec3 map_normal(float u, float v) const override;
+        structures::Vec3 normal(double u, double v) const override;
+
         const structures::Vec3 &normal() const
         {
             return normal_;
@@ -279,17 +270,16 @@ namespace environment
         intersection(const Ray &r) const override;
 
         structures::Vec3 reflect(const structures::Vec3 &p,
-                                 const structures::Vec3 &n) const override;
-        structures::Vec3 normal(const structures::Vec3 &p) const override;
-        structures::Vec3 tangent(const structures::Vec3 &p) const override;
-        structures::Vec3 map_normal(const structures::Vec3 &p) const override;
+                                 const structures::Vec3 &n) const;
+        structures::Vec3 normal(const structures::Vec3 &p) const;
+        structures::Vec3 tangent(const structures::Vec3 &p) const;
+        structures::Vec3 map_normal(const structures::Vec3 &p) const;
         const structures::Vec3 &center() const
         {
             return center_;
         }
 
-        const components
-        get_components(const structures::Vec3 &p) const override;
+        const components get_components(const structures::Vec3 &p) const;
 
     protected:
         structures::Vec3 normal_;
@@ -297,4 +287,28 @@ namespace environment
     };
 
     using mesh = std::vector<std::shared_ptr<Triangle>>;
+
+    class Mesh : public Object
+    {
+    public:
+        Mesh(mesh triangles, structures::Vec3 bb_center, double bb_radius)
+            : Object(std::make_shared<Uniform_Smooth>(display::Colour(0, 0, 0),
+                                                      0, 0, 0))
+            , triangles_{ triangles }
+            , bounding_box_{ std::make_shared<Sphere>(bb_center, txt_,
+                                                      bb_radius) }
+        {}
+        Mesh(std::shared_ptr<Texture_Material> txt, const char *pth,
+             structures::Vec3 center, double bb_radius);
+        Mesh(std::shared_ptr<Texture_Material> txt, std::shared_ptr<Map> nmap,
+             const char *pth, structures::Vec3 center, double bb_radius);
+
+        std::optional<intersection_record>
+        intersection(const Ray &r) const override;
+
+    protected:
+        mesh triangles_;
+        std::shared_ptr<Object> bounding_box_;
+    };
+
 } // namespace environment

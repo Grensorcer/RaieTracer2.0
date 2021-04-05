@@ -6,6 +6,37 @@ namespace environment
                const structures::Vec3 &center, double step, double side,
                double isosurface)
         : txt_{ txt }
+        , nmap_{ std::make_shared<Identity_Map>() }
+        , center_{ center }
+        , step_{ step }
+        , side_{ side }
+        , isosurface_{ isosurface }
+    {
+        size_t n = (side / step) + 1;
+        auto square = n * n;
+        auto cube = n * square;
+        potentials_ = std::vector<double>(cube, -1.);
+        points_.reserve(cube);
+        structures::Vec3 lower_left =
+            center - structures::Vec3({ { side / 2., side / 2., side / 2. } });
+        auto generator = [&, idx = 0]() mutable {
+            auto z = idx / square;
+            auto tmp_ = idx - (z * square);
+            auto y = tmp_ / n;
+            auto x = tmp_ % n;
+            ++idx;
+            return lower_left
+                + structures::Vec3({ { x * step, y * step, z * step } });
+        };
+
+        std::generate_n(std::back_inserter(points_), cube, generator);
+    }
+
+    Blob::Blob(std::shared_ptr<Texture_Material> txt, std::shared_ptr<Map> nmap,
+               const structures::Vec3 &center, double step, double side,
+               double isosurface)
+        : txt_{ txt }
+        , nmap_{ nmap }
         , center_{ center }
         , step_{ step }
         , side_{ side }
@@ -70,12 +101,13 @@ namespace environment
                 interpolate_vertex(c[std::get<1>(sides_[vertices[i + 2]])],
                                    c[std::get<0>(sides_[vertices[i + 2]])]);
 
-            auto triangle = std::make_shared<Smooth_Triangle>(txt_, v1, v2, v3);
+            auto triangle =
+                std::make_shared<Smooth_Triangle>(txt_, nmap_, v1, v2, v3);
             triangles.emplace_back(triangle);
         }
     }
 
-    std::vector<std::shared_ptr<Smooth_Triangle>> Blob::marching_cubes()
+    std::shared_ptr<Mesh> Blob::marching_cubes()
     {
         std::vector<std::shared_ptr<Smooth_Triangle>> res;
         size_t n = side_ / step_;
@@ -100,7 +132,8 @@ namespace environment
         {
             for (size_t i = 0; i < res.size() - 1; ++i)
             {
-                std::cout << '\r' << i << " out of " << res.size() << " triangles";
+                std::cout << '\r' << i << " out of " << res.size()
+                          << " triangles";
                 for (size_t j = i + 1; j < res.size(); ++j)
                     if (res[i]->normal() != res[j]->normal())
                         res[i]->fix_normals(*(res[j]));
@@ -109,7 +142,8 @@ namespace environment
             res[res.size() - 1]->fix_normals();
         }
 
-        return res;
+        return std::make_shared<Mesh>(mesh(res.begin(), res.end()), center_,
+                                      std::sqrt(3) * side_);
     }
 
 } // namespace environment
