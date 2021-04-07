@@ -308,7 +308,7 @@ namespace environment
 
     protected:
         mesh triangles_;
-        std::shared_ptr<Object> bounding_box_;
+        std::shared_ptr<Sphere> bounding_box_;
     };
 
 } // namespace environment

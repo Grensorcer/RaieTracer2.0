@@ -46,9 +46,9 @@ namespace environment
     std::tuple<display::Colour, double, double, double>
     Image_Texture::get_components(double u, double v) const
     {
-        size_t i = u * (double)im_.width();
-        size_t j = v * (double)im_.height();
-        return std::make_tuple<>(im_.get_pixel(i, j), kd_, ks_, ns_);
+        size_t i = v * (double)im_.width();
+        size_t j = u * (double)im_.height();
+        return std::make_tuple<>(im_.get_pixel(j, i), kd_, ks_, ns_);
     }
 
 } // namespace environment

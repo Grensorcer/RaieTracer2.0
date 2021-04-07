@@ -54,8 +54,8 @@ namespace environment
     std::pair<double, double>
     Sphere::parametrics(const structures::Vec3 &p) const
     {
-        double theta = std::atan2(-(p[2] - center_[2]), p[0] - center_[0]);
-        double phi = std::acos(-(p[1] - center_[1]) / r_);
+        double phi = std::atan2(-(p[1] - center_[1]), p[0] - center_[0]) + M_PI;
+        double theta = std::acos(-(p[2] - center_[2]) / r_);
         return std::make_pair<>(theta, phi);
     }
 
@@ -83,12 +83,12 @@ namespace environment
                                         const structures::Vec3 &t, double u,
                                         double v) const
     {
-        return map_->normal(n, t, n ^ t, (u + M_PI) / (2 * M_PI), v / M_PI);
+        return map_->normal(n, t, n ^ t, u / M_PI, v / (2 * M_PI));
     }
 
     const components Sphere::get_components(double u, double v) const
     {
-        return txt_->get_components((u + M_PI) / (2 * M_PI), v / M_PI);
+        return txt_->get_components(u / M_PI, v / (2 * M_PI));
     }
 
     std::optional<intersection_record> Plane::intersection(const Ray &r) const
@@ -253,7 +253,7 @@ namespace environment
             const double *c3 = m.tri_corner_coords(i, 2);
 
             auto triangle = std::make_shared<Triangle>(
-                txt, nmap, structures::Vec3({ c1[0], c1[1], c1[2] }) + center,
+                txt, structures::Vec3({ c1[0], c1[1], c1[2] }) + center,
                 structures::Vec3({ c2[0], c2[1], c2[2] }) + center,
                 structures::Vec3({ c3[0], c3[1], c3[2] }) + center);
 
@@ -284,6 +284,17 @@ namespace environment
                     res = r_ir;
                 return res;
             });
+
+        auto r_from_triangle = Ray(r.at(res->t), res->normal);
+        auto i = bounding_box_->intersection(r_from_triangle);
+        if (!i)
+        {
+            std::cout << "Found no intersection with the bounding box\n";
+            return std::nullopt;
+        }
+
+        res->comps = i->comps;
+        res->normal = i->normal;
 
         return res;
     }

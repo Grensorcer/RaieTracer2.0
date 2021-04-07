@@ -132,8 +132,8 @@ namespace display
         width_ = width;
         height_ = height;
         pixels_.reserve(width * height);
-        for (int i = 0; i < width * height; ++i)
-            pixels_.emplace_back(data + (3 * i));
+        for (int i = 0; i < 3 * width * height; i += 3)
+            pixels_.emplace_back(data + i);
         stbi_image_free(data);
     }
 

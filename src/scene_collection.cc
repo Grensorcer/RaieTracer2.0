@@ -166,10 +166,9 @@ namespace environment
             "../data/Paper_Wrinkled_001_basecolor.jpg", 1., 1., 1.);
         auto n_m = std::make_shared<Normal_Map>(
             "../data/Paper_Wrinkled_001_normal.jpg");
-        auto b =
-            Blob(txt, n_m, structures::Vec3({ { 0, -4, 0 } }), 0.15, 4, 0.5);
-        b.add_energy(structures::Vec3({ { 0.75, -4, 0.75 } }));
-        b.add_energy(structures::Vec3({ { -0.75, -4, 0 } }));
+        auto b = Blob(txt, n_m, structures::Vec3({ { 0, -4, 0 } }), 0.15, 2, 8);
+        b.add_energy(structures::Vec3({ { 0.35, -4, -0.35 } }));
+        b.add_energy(structures::Vec3({ { -0.35, -4, 0.35 } }));
         auto blob_mesh = b.marching_cubes();
 
         s.add_object(blob_mesh);
@@ -195,20 +194,19 @@ namespace environment
     Scene &scene_mesh(Scene &s)
     {
         auto txt = std::make_shared<Image_Texture>(
-            "../data/Paper_Wrinkled_001_basecolor.jpg", 1., 1., 1.);
+            "../data/Seamless_Pebbles_Texture.jpg", 1., 1., 1.);
         auto n_m = std::make_shared<Normal_Map>(
-            "../data/Paper_Wrinkled_001_normal.jpg");
-        auto cup =
-            std::make_shared<Mesh>(txt, n_m, "../data/froggy_less.stl",
-                                   structures::Vec3({ 0, -3, 0 }), 1.862);
+            "../data/Seamless_Pebbles_Texture_NORMAL.jpg");
+        auto cup = std::make_shared<Mesh>(txt, n_m, "../data/new_froggy.stl",
+                                          structures::Vec3({ 0, -3, 0 }), 1.2);
 
         s.add_object(cup);
 
         s.add_object(std::make_shared<Sphere>(
             structures::Vec3({ { 4, -3, 1 } }),
-            std::make_shared<Uniform_Metal>(display::Colour(0.5, 0.5, 0.5), 1.,
-                                            0.5, 0.5),
-            n_m, 1.));
+            std::make_shared<Uniform_Metal>(display::Colour(0.8, 0.2, 0.2), 1.,
+                                            0.2, 0.2),
+            2.4));
 
         /*
         s.add_object(std::make_shared<Plane>(
@@ -219,7 +217,7 @@ namespace environment
             */
 
         s.add_light(std::make_shared<Point_Light>(
-            structures::Vec3({ { -1, -1, 1 } }), 1.5));
+            structures::Vec3({ { -1, -0.5, 0.5 } }), 1));
 
         return s;
     }
@@ -229,16 +227,17 @@ namespace environment
         s.add_object(std::make_shared<Sphere>(
             structures::Vec3({ 1.5, -2, 0 }),
             std::make_shared<Image_Texture>(
-                "../data/Metal_Gate_002_basecolor.jpg", 1., 0.7, 0.7),
-            std::make_shared<Normal_Map>("../data/Metal_Gate_002_normal.jpg"),
+                "../data/Paper_Wrinkled_001_basecolor.jpg", 1., 0.7, 0.7),
+            std::make_shared<Normal_Map>(
+                "../data/Paper_Wrinkled_001_normal.jpg"),
             1.));
         s.add_object(std::make_shared<Sphere>(
-            structures::Vec3({ -1.5, -2, 0 }),
+            structures::Vec3({ 0.5, -2, 2.4 }),
             std::make_shared<Uniform_Metal>(display::Colour(0.5, 0.5, 0.5), 1.,
                                             0.01, 0.01),
-            1.));
+            1.3));
         s.add_light(
-            std::make_shared<Point_Light>(structures::Vec3({ -3, -1, 3 }), 3.));
+            std::make_shared<Point_Light>(structures::Vec3({ 0, -1, 1 }), 1.));
 
         return s;
     }

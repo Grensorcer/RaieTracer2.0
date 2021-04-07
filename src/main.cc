@@ -14,7 +14,7 @@ int raytracer()
     auto start = std::chrono::high_resolution_clock::now();
     // Image
     const double aspect_ratio = 16. / 9.;
-    const size_t width = 1280;
+    const size_t width = 1920;
     const size_t height = width / aspect_ratio;
     auto im = display::Image(height, width);
     constexpr size_t sample_per_pixel = 4;
