@@ -7,6 +7,7 @@
 
 namespace environment
 {
+    class Object;
     class Material
     {
     public:
@@ -20,17 +21,26 @@ namespace environment
         {}
         virtual ~Material() = default;
         virtual structures::Vec3 reflect(const structures::Vec3 &p,
-                                         const structures::Vec3 &n) const = 0;
+                                         const structures::Vec3 &n) const;
         virtual std::tuple<display::Colour, double, double, double>
-        get_components(double u, double v) const = 0;
+        get_components(double u, double v) const;
         virtual structures::Vec3 normal(const structures::Vec3 &n,
                                         const structures::Vec3 &t,
                                         const structures::Vec3 &b, double u,
-                                        double v) const = 0;
+                                        double v) const;
+        virtual structures::Vec3 get_height_intersection(
+            const structures::Vec3 &p, const structures::Vec3 &n,
+            const structures::Vec3 &t, const structures::Vec3 &b) const = 0;
+
+        void set_obj(std::shared_ptr<Object> obj)
+        {
+            obj_ = obj;
+        }
 
     protected:
         std::shared_ptr<Texture> txt_;
         std::shared_ptr<Map> nmap_;
+        std::shared_ptr<Object> obj_;
     };
 
     class Classic_Material : public Material
@@ -43,14 +53,40 @@ namespace environment
                          std::shared_ptr<Map> nmap)
             : Material(txt, nmap)
         {}
-
-        structures::Vec3 reflect(const structures::Vec3 &p,
-                                 const structures::Vec3 &n) const override;
-        std::tuple<display::Colour, double, double, double>
-        get_components(double u, double v) const override;
-        structures::Vec3 normal(const structures::Vec3 &n,
+        structures::Vec3
+        get_height_intersection(const structures::Vec3 &p,
+                                const structures::Vec3 &n,
                                 const structures::Vec3 &t,
-                                const structures::Vec3 &b, double u,
-                                double v) const override;
+                                const structures::Vec3 &b) const override;
+    };
+
+    class Relief_Material : public Material
+    {
+    public:
+        Relief_Material(std::shared_ptr<Texture> txt, std::shared_ptr<Map> nmap,
+                        std::shared_ptr<Image_Texture> hm)
+            : Material(txt, nmap)
+            , hmap_{ hm }
+        {}
+        structures::Vec3
+        get_height_intersection(const structures::Vec3 &p,
+                                const structures::Vec3 &n,
+                                const structures::Vec3 &t,
+                                const structures::Vec3 &b) const override;
+
+    protected:
+        std::shared_ptr<Image_Texture> hmap_;
+
+        structures::Vec3
+        find_intersection(const structures::Vec3 &p,
+                          const structures::FixedMatrix<3, 3> &t2w,
+                          const structures::FixedMatrix<3, 3> &w2t) const;
+        const structures::FixedMatrix<3, 3>
+        t2w(const structures::Vec3 &n, const structures::Vec3 &t,
+            const structures::Vec3 &b) const;
+        const structures::FixedMatrix<3, 3>
+        w2t(const structures::Vec3 &n, const structures::Vec3 &t,
+            const structures::Vec3 &b) const;
+        double b_factor(const structures::Vec3 &a) const;
     };
 } // namespace environment

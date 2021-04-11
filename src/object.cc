@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <numeric>
+#include <stdexcept>
 
 namespace environment
 {
@@ -37,17 +38,24 @@ namespace environment
             return res;
         // t -= 0.4;
         auto i = r.at(t);
-        auto u_v = parametrics(i);
+        auto map_u_v = map_parametrics(i);
         auto sphere_normal = normal(i);
-        auto sphere_tangent = tangent(u_v.second);
-        auto m_n =
-            map_normal(sphere_normal, sphere_tangent, u_v.first, u_v.second);
+        auto sphere_tangent = tangent(map_u_v.second);
+
+        auto height_intersection = mat_->get_height_intersection(
+            i, sphere_normal, sphere_tangent, sphere_normal ^ sphere_tangent);
+        map_u_v = map_parametrics(height_intersection);
+        sphere_normal = normal(height_intersection);
+        sphere_tangent = tangent(map_u_v.second);
+
+        auto m_n = map_normal(sphere_normal, sphere_tangent, map_u_v.first,
+                              map_u_v.second);
 
         res = std::make_optional<>(intersection_record{});
         res->t = t;
         res->normal = m_n;
-        res->comps = get_components(u_v.first, u_v.second);
-        res->reflected = reflect(i, res->normal);
+        res->comps = get_components(map_u_v.first, map_u_v.second);
+        res->reflected = reflect(height_intersection, m_n);
 
         return res;
     }
@@ -84,12 +92,19 @@ namespace environment
                                         const structures::Vec3 &t, double u,
                                         double v) const
     {
-        return mat_->normal(n, t, n ^ t, u / M_PI, v / (2 * M_PI));
+        return mat_->normal(n, t, n ^ t, u, v);
     }
 
     const components Sphere::get_components(double u, double v) const
     {
-        return mat_->get_components(u / M_PI, v / (2 * M_PI));
+        return mat_->get_components(u, v);
+    }
+
+    std::pair<double, double>
+    Sphere::map_parametrics(const structures::Vec3 &p) const
+    {
+        auto u_v = parametrics(p);
+        return std::make_pair<>(u_v.first / M_PI, u_v.second / (2 * M_PI));
     }
 
     std::optional<intersection_record> Plane::intersection(const Ray &r) const
@@ -134,6 +149,13 @@ namespace environment
     {
         // TODO
         return normal(p);
+    }
+
+    std::pair<double, double>
+    Plane::map_parametrics(const structures::Vec3 &p) const
+    {
+        // TODO
+        throw std::invalid_argument("This function cannot be called dude");
     }
 
     const components Plane::get_components(const structures::Vec3 &p) const
@@ -213,6 +235,26 @@ namespace environment
         return mat_->get_components(u, v);
     }
 
+    std::pair<double, double>
+    Triangle::map_parametrics(const structures::Vec3 &p) const
+    {
+        auto e0 = vertices_[1] - vertices_[0];
+        auto e1 = vertices_[2] - vertices_[0];
+        auto e2 = p - vertices_[0];
+        float n0 = e0 * e0;
+        float n1 = e0 * e1;
+        float n2 = e1 * e1;
+        float n3 = e2 * e0;
+        float n4 = e2 * e1;
+        float d = n0 * n2 - n1 * n1;
+
+        auto v = (n2 * n3 - n1 * n4) / d;
+        auto w = (n0 * n4 - n1 * n3) / d;
+        auto u = 1. - v - w;
+
+        return std::make_pair<>(u, v);
+    }
+
     structures::Vec3 Smooth_Triangle::normal(double u, double v) const
     {
         auto w = 1 - u - v;
@@ -253,6 +295,8 @@ namespace environment
             }
             triangles_[triangles_.size() - 1]->fix_normals();
         }
+
+        mat_->set_obj(std::make_shared<Mesh>(*this));
     }
 
     std::optional<intersection_record> Mesh::intersection(const Ray &r) const
@@ -291,8 +335,16 @@ namespace environment
 
         res->comps = i->comps;
         res->normal = i->normal;
+        res->reflected = i->reflected;
 
         return res;
+    }
+
+    std::pair<double, double>
+    Mesh::map_parametrics(const structures::Vec3 &p) const
+    {
+        // TODO
+        throw std::invalid_argument("This function cannot be called dude");
     }
 
 } // namespace environment

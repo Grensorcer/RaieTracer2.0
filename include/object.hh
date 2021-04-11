@@ -32,6 +32,8 @@ namespace environment
         virtual ~Object() = default;
         virtual std::optional<intersection_record>
         intersection(const Ray &r) const = 0;
+        virtual std::pair<double, double>
+        map_parametrics(const structures::Vec3 &p) const = 0;
 
     protected:
         std::shared_ptr<Material> mat_;
@@ -45,7 +47,9 @@ namespace environment
             : Object(mat)
             , r_{ radius }
             , center_{ center }
-        {}
+        {
+            mat_->set_obj(std::make_shared<Sphere>(*this));
+        }
 
         const double &radius() const
         {
@@ -67,6 +71,8 @@ namespace environment
                                     double v) const;
 
         const components get_components(double u, double v) const;
+        std::pair<double, double>
+        map_parametrics(const structures::Vec3 &p) const override;
 
         const structures::Vec3 &center() const
         {
@@ -94,6 +100,8 @@ namespace environment
             auto tmp_db = structures::norm(tmp_b);
             auto angle = std::acos((tmp_a * tmp_b) / (tmp_da * tmp_db));
             area_ = ((tmp_a * tmp_b) * std::sin(angle)) / 2;
+
+            mat_->set_obj(std::make_shared<Triangle>(*this));
         }
 
         std::optional<intersection_record>
@@ -107,6 +115,8 @@ namespace environment
         virtual structures::Vec3 map_normal(double u, double v) const;
 
         const components get_components(double u, double v) const;
+        std::pair<double, double>
+        map_parametrics(const structures::Vec3 &p) const override;
 
         const structures::Vec3 &a() const
         {
@@ -213,6 +223,8 @@ namespace environment
             , center_{ center }
         {
             structures::unit(normal);
+
+            mat_->set_obj(std::make_shared<Plane>(*this));
         }
 
         // const structures::Vec3 at(double i, double j) const override;
@@ -231,6 +243,8 @@ namespace environment
         }
 
         const components get_components(const structures::Vec3 &p) const;
+        std::pair<double, double>
+        map_parametrics(const structures::Vec3 &p) const override;
 
     protected:
         structures::Vec3 normal_;
@@ -249,12 +263,16 @@ namespace environment
             , triangles_{ triangles }
             , bounding_box_{ std::make_shared<Sphere>(bb_center, mat,
                                                       bb_radius) }
-        {}
+        {
+            mat_->set_obj(std::make_shared<Mesh>(*this));
+        }
         Mesh(std::shared_ptr<Material> mat, const char *pth,
              structures::Vec3 center, double bb_radius);
 
         std::optional<intersection_record>
         intersection(const Ray &r) const override;
+        std::pair<double, double>
+        map_parametrics(const structures::Vec3 &p) const override;
 
     protected:
         smooth_mesh triangles_;
