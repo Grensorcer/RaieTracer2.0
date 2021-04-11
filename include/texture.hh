@@ -6,17 +6,17 @@
 #include "matrix.hh"
 namespace environment
 {
-    class Texture_Material
+    class Texture
     {
     public:
-        virtual ~Texture_Material() = default;
+        virtual ~Texture() = default;
         virtual structures::Vec3 reflect(const structures::Vec3 &p,
                                          const structures::Vec3 &n) const = 0;
         virtual std::tuple<display::Colour, double, double, double>
         get_components(double u, double v) const = 0;
     };
 
-    class Uniform_Texture : public Texture_Material
+    class Uniform_Texture : public Texture
     {
     public:
         Uniform_Texture(const Uniform_Texture &txt) = default;
@@ -58,7 +58,7 @@ namespace environment
                                  const structures::Vec3 &n) const override;
     };
 
-    class Image_Texture : public Texture_Material
+    class Image_Texture : public Texture
     {
     public:
         Image_Texture(const Image_Texture &txt) = default;

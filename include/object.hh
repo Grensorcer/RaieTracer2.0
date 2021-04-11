@@ -6,11 +6,10 @@
 #include <optional>
 #include <tuple>
 
-#include "maps.hh"
+#include "material.hh"
 #include "matrix.hh"
 #include "ray.hh"
 #include "stl_reader.h"
-#include "texture.hh"
 
 namespace environment
 {
@@ -26,14 +25,8 @@ namespace environment
     class Object
     {
     public:
-        Object(std::shared_ptr<Texture_Material> txt)
-            : txt_{ txt }
-        {
-            map_ = std::make_shared<Identity_Map>();
-        }
-        Object(std::shared_ptr<Texture_Material> txt, std::shared_ptr<Map> m)
-            : txt_{ txt }
-            , map_{ m }
+        Object(std::shared_ptr<Material> mat)
+            : mat_{ mat }
         {}
 
         virtual ~Object() = default;
@@ -41,24 +34,15 @@ namespace environment
         intersection(const Ray &r) const = 0;
 
     protected:
-        std::shared_ptr<Texture_Material> txt_;
-        std::shared_ptr<Map> map_;
+        std::shared_ptr<Material> mat_;
     };
 
     class Sphere : public Object
     {
     public:
-        Sphere(const structures::Vec3 &center,
-               std::shared_ptr<Texture_Material> txt, const double &radius)
-            : Object(txt)
-            , r_{ radius }
-            , center_{ center }
-        {}
-
-        Sphere(const structures::Vec3 &center,
-               std::shared_ptr<Texture_Material> txt, std::shared_ptr<Map> m,
+        Sphere(const structures::Vec3 &center, std::shared_ptr<Material> mat,
                const double &radius)
-            : Object(txt, m)
+            : Object(mat)
             , r_{ radius }
             , center_{ center }
         {}
@@ -97,26 +81,9 @@ namespace environment
     class Triangle : public Object
     {
     public:
-        Triangle(std::shared_ptr<Texture_Material> txt,
-                 const structures::Vec3 &a, const structures::Vec3 &b,
-                 const structures::Vec3 &c)
-            : Object(txt)
-            , vertices_{ a, b, c }
-        {
-            auto tmp_a = b - a;
-            auto tmp_b = c - a;
-            normal_ = tmp_a ^ tmp_b;
-            structures::unit(normal_);
-            auto tmp_da = structures::norm(tmp_a);
-            auto tmp_db = structures::norm(tmp_b);
-            auto angle = std::acos((tmp_a * tmp_b) / (tmp_da * tmp_db));
-            area_ = ((tmp_a * tmp_b) * std::sin(angle)) / 2;
-        }
-
-        Triangle(std::shared_ptr<Texture_Material> txt, std::shared_ptr<Map> m,
-                 const structures::Vec3 &a, const structures::Vec3 &b,
-                 const structures::Vec3 &c)
-            : Object(txt, m)
+        Triangle(std::shared_ptr<Material> mat, const structures::Vec3 &a,
+                 const structures::Vec3 &b, const structures::Vec3 &c)
+            : Object(mat)
             , vertices_{ a, b, c }
         {
             auto tmp_a = b - a;
@@ -173,16 +140,10 @@ namespace environment
     class Smooth_Triangle : public Triangle
     {
     public:
-        Smooth_Triangle(std::shared_ptr<Texture_Material> txt,
+        Smooth_Triangle(std::shared_ptr<Material> mat,
                         const structures::Vec3 &a, const structures::Vec3 &b,
                         const structures::Vec3 &c)
-            : Triangle(txt, a, b, c)
-            , normals_{ normal_ * area_, normal_ * area_, normal_ * area_ }
-        {}
-        Smooth_Triangle(std::shared_ptr<Texture_Material> txt,
-                        std::shared_ptr<Map> m, const structures::Vec3 &a,
-                        const structures::Vec3 &b, const structures::Vec3 &c)
-            : Triangle(txt, m, a, b, c)
+            : Triangle(mat, a, b, c)
             , normals_{ normal_ * area_, normal_ * area_, normal_ * area_ }
         {}
 
@@ -245,19 +206,9 @@ namespace environment
     class Plane : public Object
     {
     public:
-        Plane(const structures::Vec3 &center,
-              std::shared_ptr<Texture_Material> txt,
+        Plane(const structures::Vec3 &center, std::shared_ptr<Material> mat,
               const structures::Vec3 &normal)
-            : Object(txt)
-            , normal_{ normal }
-            , center_{ center }
-        {
-            structures::unit(normal);
-        }
-        Plane(const structures::Vec3 &center,
-              std::shared_ptr<Texture_Material> txt, std::shared_ptr<Map> m,
-              const structures::Vec3 &normal)
-            : Object(txt, m)
+            : Object(mat)
             , normal_{ normal }
             , center_{ center }
         {
@@ -287,27 +238,26 @@ namespace environment
     };
 
     using mesh = std::vector<std::shared_ptr<Triangle>>;
+    using smooth_mesh = std::vector<std::shared_ptr<Smooth_Triangle>>;
 
     class Mesh : public Object
     {
     public:
-        Mesh(mesh triangles, structures::Vec3 bb_center, double bb_radius)
-            : Object(std::make_shared<Uniform_Smooth>(display::Colour(0, 0, 0),
-                                                      0, 0, 0))
+        Mesh(smooth_mesh triangles, std::shared_ptr<Material> mat,
+             structures::Vec3 bb_center, double bb_radius)
+            : Object(mat)
             , triangles_{ triangles }
-            , bounding_box_{ std::make_shared<Sphere>(bb_center, txt_,
+            , bounding_box_{ std::make_shared<Sphere>(bb_center, mat,
                                                       bb_radius) }
         {}
-        Mesh(std::shared_ptr<Texture_Material> txt, const char *pth,
+        Mesh(std::shared_ptr<Material> mat, const char *pth,
              structures::Vec3 center, double bb_radius);
-        Mesh(std::shared_ptr<Texture_Material> txt, std::shared_ptr<Map> nmap,
-             const char *pth, structures::Vec3 center, double bb_radius);
 
         std::optional<intersection_record>
         intersection(const Ray &r) const override;
 
     protected:
-        mesh triangles_;
+        smooth_mesh triangles_;
         std::shared_ptr<Sphere> bounding_box_;
     };
 

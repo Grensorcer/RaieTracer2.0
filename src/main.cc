@@ -4,7 +4,9 @@
 #include <thread>
 
 #include "image.hh"
+#include "map_collection.hh"
 #include "matrix.hh"
+#include "model_collection.hh"
 #include "scene.hh"
 #include "scene_collection.hh"
 #include "utils.hh"
@@ -14,22 +16,24 @@ int raytracer()
     auto start = std::chrono::high_resolution_clock::now();
     // Image
     const double aspect_ratio = 16. / 9.;
-    const size_t width = 1920;
+    const size_t width = 1280;
     const size_t height = width / aspect_ratio;
     auto im = display::Image(height, width);
-    constexpr size_t sample_per_pixel = 4;
+    constexpr size_t sample_per_pixel = 3;
     constexpr size_t nb_threads = 4;
 
     // Camera
     auto cam_origin = structures::Vec3({ 0, 0, 0 });
-    auto v_fov = 2.0;
+    auto v_fov = 2.;
     auto h_fov = aspect_ratio * v_fov;
     auto cam = environment::Camera(
         cam_origin, structures::Vec3({ { 0, 0, 1 } }),
         structures::Vec3({ { 0, -1, 0 } }), 1., v_fov, h_fov);
     auto scene = environment::Scene(cam, 0.3);
 
-    environment::scene_mesh(scene);
+    // environment::scene_mesh(scene, environment::wood_wall,
+    // environment::lion);
+    environment::scene_sphere_texture_reflect(scene, environment::wood_wall);
     auto stop_create = std::chrono::high_resolution_clock::now();
     auto time_create =
         std::chrono::duration_cast<std::chrono::seconds>(stop_create - start);
@@ -51,7 +55,7 @@ int raytracer()
                             / (height - 1),
                         (static_cast<double>(j) + utils::random_double())
                             / (width - 1));
-                    color += scene.cast_ray(ray, 8);
+                    color += scene.cast_ray(ray, 4);
                 }
 
                 im.set_pixel(i, j, color / sample_per_pixel);

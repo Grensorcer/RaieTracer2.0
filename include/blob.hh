@@ -12,12 +12,8 @@ namespace environment
         using cube = std::array<size_t, 8>;
 
     public:
-        Blob(std::shared_ptr<Texture_Material> txt,
-             const structures::Vec3 &center, double step, double side,
-             double isosurface);
-        Blob(std::shared_ptr<Texture_Material> txt, std::shared_ptr<Map> nmap,
-             const structures::Vec3 &center, double step, double side,
-             double isosurface);
+        Blob(std::shared_ptr<Material> mat, const structures::Vec3 &center,
+             double step, double side, double isosurface);
 
         const double &side() const
         {
@@ -84,8 +80,7 @@ namespace environment
         std::shared_ptr<Mesh> marching_cubes();
 
     protected:
-        std::shared_ptr<Texture_Material> txt_;
-        std::shared_ptr<Map> nmap_;
+        std::shared_ptr<Material> mat_;
         structures::Vec3 center_;
         double step_;
         double side_;

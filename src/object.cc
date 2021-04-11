@@ -35,6 +35,7 @@ namespace environment
                                                                       : sol1;
         if (t < 0)
             return res;
+        // t -= 0.4;
         auto i = r.at(t);
         auto u_v = parametrics(i);
         auto sphere_normal = normal(i);
@@ -76,19 +77,19 @@ namespace environment
     structures::Vec3 Sphere::reflect(const structures::Vec3 &p,
                                      const structures::Vec3 &n) const
     {
-        return txt_->reflect(p, n);
+        return mat_->reflect(p, n);
     }
 
     structures::Vec3 Sphere::map_normal(const structures::Vec3 &n,
                                         const structures::Vec3 &t, double u,
                                         double v) const
     {
-        return map_->normal(n, t, n ^ t, u / M_PI, v / (2 * M_PI));
+        return mat_->normal(n, t, n ^ t, u / M_PI, v / (2 * M_PI));
     }
 
     const components Sphere::get_components(double u, double v) const
     {
-        return txt_->get_components(u / M_PI, v / (2 * M_PI));
+        return mat_->get_components(u / M_PI, v / (2 * M_PI));
     }
 
     std::optional<intersection_record> Plane::intersection(const Ray &r) const
@@ -112,7 +113,7 @@ namespace environment
     structures::Vec3 Plane::reflect(const structures::Vec3 &p,
                                     const structures::Vec3 &n) const
     {
-        return txt_->reflect(p, n);
+        return mat_->reflect(p, n);
     }
 
     structures::Vec3 Plane::normal(const structures::Vec3 &p) const
@@ -125,6 +126,7 @@ namespace environment
     structures::Vec3 Plane::tangent(const structures::Vec3 &p) const
     {
         // TODO
+        (void)p;
         return structures::Vec3();
     }
 
@@ -137,7 +139,8 @@ namespace environment
     const components Plane::get_components(const structures::Vec3 &p) const
     {
         // TODO
-        return txt_->get_components(0, 0);
+        (void)p;
+        return mat_->get_components(0, 0);
     }
 
     std::optional<intersection_record>
@@ -181,7 +184,7 @@ namespace environment
     structures::Vec3 Triangle::reflect(const structures::Vec3 &p,
                                        const structures::Vec3 &n) const
     {
-        return txt_->reflect(p, n);
+        return mat_->reflect(p, n);
     }
 
     structures::Vec3 Triangle::tangent(double u, double v) const
@@ -202,12 +205,12 @@ namespace environment
     {
         auto n = normal(u, v);
         auto t = tangent(u, v);
-        return map_->normal(n, t, n ^ t, u, v);
+        return mat_->normal(n, t, n ^ t, u, v);
     }
 
     const components Triangle::get_components(double u, double v) const
     {
-        return txt_->get_components(u, v);
+        return mat_->get_components(u, v);
     }
 
     structures::Vec3 Smooth_Triangle::normal(double u, double v) const
@@ -216,10 +219,10 @@ namespace environment
         return w * normals_[0] + u * normals_[1] + v * normals_[2];
     }
 
-    Mesh::Mesh(std::shared_ptr<Texture_Material> txt, const char *pth,
+    Mesh::Mesh(std::shared_ptr<Material> mat, const char *pth,
                structures::Vec3 center, double bb_radius)
-        : Object(txt)
-        , bounding_box_{ std::make_shared<Sphere>(center, txt, bb_radius) }
+        : Object(mat)
+        , bounding_box_{ std::make_shared<Sphere>(center, mat, bb_radius) }
     {
         stl_reader::StlMesh<double, size_t> m(pth);
         triangles_.reserve(m.num_tris());
@@ -229,35 +232,26 @@ namespace environment
             const double *c2 = m.tri_corner_coords(i, 1);
             const double *c3 = m.tri_corner_coords(i, 2);
 
-            auto triangle = std::make_shared<Triangle>(
-                txt, structures::Vec3({ c1[0], c1[1], c1[2] }) + center,
+            auto triangle = std::make_shared<Smooth_Triangle>(
+                mat, structures::Vec3({ c1[0], c1[1], c1[2] }) + center,
                 structures::Vec3({ c2[0], c2[1], c2[2] }) + center,
                 structures::Vec3({ c3[0], c3[1], c3[2] }) + center);
 
             triangles_.emplace_back(triangle);
         }
-    }
 
-    Mesh::Mesh(std::shared_ptr<Texture_Material> txt, std::shared_ptr<Map> nmap,
-               const char *pth, structures::Vec3 center, double bb_radius)
-        : Object(txt, nmap)
-        , bounding_box_{ std::make_shared<Sphere>(center, txt, nmap,
-                                                  bb_radius) }
-    {
-        stl_reader::StlMesh<double, size_t> m(pth);
-        triangles_.reserve(m.num_tris());
-        for (size_t i = 0; i < m.num_tris(); ++i)
+        if (triangles_.size() > 0)
         {
-            const double *c1 = m.tri_corner_coords(i, 0);
-            const double *c2 = m.tri_corner_coords(i, 1);
-            const double *c3 = m.tri_corner_coords(i, 2);
-
-            auto triangle = std::make_shared<Triangle>(
-                txt, structures::Vec3({ c1[0], c1[1], c1[2] }) + center,
-                structures::Vec3({ c2[0], c2[1], c2[2] }) + center,
-                structures::Vec3({ c3[0], c3[1], c3[2] }) + center);
-
-            triangles_.emplace_back(triangle);
+            for (size_t i = 0; i < triangles_.size() - 1; ++i)
+            {
+                std::cout << '\r' << i << " out of " << triangles_.size()
+                          << " triangles";
+                for (size_t j = i + 1; j < triangles_.size(); ++j)
+                    if (triangles_[i]->normal() != triangles_[j]->normal())
+                        triangles_[i]->fix_normals(*(triangles_[j]));
+                triangles_[i]->fix_normals();
+            }
+            triangles_[triangles_.size() - 1]->fix_normals();
         }
     }
 
@@ -284,12 +278,14 @@ namespace environment
                     res = r_ir;
                 return res;
             });
+        if (!res)
+            return std::nullopt;
 
         auto r_from_triangle = Ray(r.at(res->t), res->normal);
         auto i = bounding_box_->intersection(r_from_triangle);
         if (!i)
         {
-            std::cout << "Found no intersection with the bounding box\n";
+            std::cerr << "Found no intersection with the bounding box\n";
             return std::nullopt;
         }
 

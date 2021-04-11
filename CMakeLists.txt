@@ -39,7 +39,7 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
 endif()
 # end gtest
 
-set(SRC src/matrix.cc src/texture.cc src/camera.cc src/image.cc src/light.cc src/object.cc src/ray.cc src/scene.cc src/scene_collection.cc src/utils.cc src/blob.cc src/maps.cc)
+set(SRC src/matrix.cc src/texture.cc src/camera.cc src/image.cc src/light.cc src/object.cc src/ray.cc src/scene.cc src/scene_collection.cc src/utils.cc src/blob.cc src/maps.cc src/material.cc)
 
 add_executable(RaieTracer src/main.cc ${SRC})
 target_compile_features(RaieTracer PUBLIC cxx_std_17)

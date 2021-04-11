@@ -2,41 +2,9 @@
 
 namespace environment
 {
-    Blob::Blob(std::shared_ptr<Texture_Material> txt,
-               const structures::Vec3 &center, double step, double side,
-               double isosurface)
-        : txt_{ txt }
-        , nmap_{ std::make_shared<Identity_Map>() }
-        , center_{ center }
-        , step_{ step }
-        , side_{ side }
-        , isosurface_{ isosurface }
-    {
-        size_t n = (side / step) + 1;
-        auto square = n * n;
-        auto cube = n * square;
-        potentials_ = std::vector<double>(cube, -1.);
-        points_.reserve(cube);
-        structures::Vec3 lower_left =
-            center - structures::Vec3({ { side / 2., side / 2., side / 2. } });
-        auto generator = [&, idx = 0]() mutable {
-            auto z = idx / square;
-            auto tmp_ = idx - (z * square);
-            auto y = tmp_ / n;
-            auto x = tmp_ % n;
-            ++idx;
-            return lower_left
-                + structures::Vec3({ { x * step, y * step, z * step } });
-        };
-
-        std::generate_n(std::back_inserter(points_), cube, generator);
-    }
-
-    Blob::Blob(std::shared_ptr<Texture_Material> txt, std::shared_ptr<Map> nmap,
-               const structures::Vec3 &center, double step, double side,
-               double isosurface)
-        : txt_{ txt }
-        , nmap_{ nmap }
+    Blob::Blob(std::shared_ptr<Material> mat, const structures::Vec3 &center,
+               double step, double side, double isosurface)
+        : mat_{ mat }
         , center_{ center }
         , step_{ step }
         , side_{ side }
@@ -101,8 +69,7 @@ namespace environment
                 interpolate_vertex(c[std::get<1>(sides_[vertices[i + 2]])],
                                    c[std::get<0>(sides_[vertices[i + 2]])]);
 
-            auto triangle =
-                std::make_shared<Smooth_Triangle>(txt_, nmap_, v1, v2, v3);
+            auto triangle = std::make_shared<Smooth_Triangle>(mat_, v1, v2, v3);
             triangles.emplace_back(triangle);
         }
     }
@@ -142,8 +109,9 @@ namespace environment
             res[res.size() - 1]->fix_normals();
         }
 
-        return std::make_shared<Mesh>(mesh(res.begin(), res.end()), center_,
-                                      std::sqrt(3) * side_);
+        // return std::make_shared<Mesh>(mesh(res.begin(), res.end()), center_,
+        //                               std::sqrt(3) * side_);
+        return std::make_shared<Mesh>(res, mat_, center_, std::sqrt(3) * side_);
     }
 
 } // namespace environment
