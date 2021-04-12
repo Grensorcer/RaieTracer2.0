@@ -4,6 +4,11 @@
 
 namespace environment
 {
+    double modulo(double a, double b)
+    {
+        double r = std::fmod(a, b);
+        return r < 0 ? r + b : r;
+    }
     structures::Vec3 Material::reflect(const structures::Vec3 &p,
                                        const structures::Vec3 &n) const
     {
@@ -113,9 +118,8 @@ namespace environment
         {
             depth -= step;
             auto cur_uv = dp + ds * depth;
-            auto comps = hmap_->get_components(
-                cur_uv[0],
-                cur_uv[1]); // TODO: Remove sphere harcoding
+            auto comps = hmap_->get_components(modulo(cur_uv[0], 1),
+                                               modulo(cur_uv[1], 1));
             if (1 - std::get<0>(comps).r() <= depth)
                 best_depth = depth;
         }
@@ -124,9 +128,8 @@ namespace environment
         {
             step *= 0.5;
             auto cur_uv = dp + ds * depth;
-            auto comps = hmap_->get_components(
-                cur_uv[0],
-                cur_uv[1]); // TODO: Remove sphere hardcoding
+            auto comps = hmap_->get_components(modulo(cur_uv[0], 1),
+                                               modulo(cur_uv[1], 1));
             if (depth >= 1 - std::get<0>(comps).r())
             {
                 best_depth = depth;
@@ -136,8 +139,7 @@ namespace environment
         }
 
         auto new_uv = dp + ds * best_depth;
-        return std::make_pair(new_uv[0],
-                              new_uv[1]); // TODO: Remove sphere hardcoding
+        return std::make_pair(modulo(new_uv[0], 1), modulo(new_uv[1], 1));
     }
 
     const structures::FixedMatrix<3, 3>

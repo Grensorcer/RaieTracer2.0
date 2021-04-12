@@ -104,8 +104,8 @@ namespace environment
     Sphere::map_parametrics(const structures::Vec3 &p) const
     {
         auto u_v = parametrics(p);
-        return std::make_pair<>(std::fmod(u_v.first / M_PI, 1),
-                                std::fmod(u_v.second / (2 * M_PI), 1));
+        return std::make_pair<>(std::fmod(u_v.first / M_PI + 0.7, 1),
+                                std::fmod(u_v.second / (2 * M_PI) + 0.40, 1));
     }
 
     std::optional<intersection_record> Plane::intersection(const Ray &r) const

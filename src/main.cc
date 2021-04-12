@@ -16,11 +16,11 @@ int raytracer()
     auto start = std::chrono::high_resolution_clock::now();
     // Image
     const double aspect_ratio = 16. / 9.;
-    const size_t width = 1280;
+    const size_t width = 1920;
     const size_t height = width / aspect_ratio;
     auto im = display::Image(height, width);
     constexpr size_t sample_per_pixel = 3;
-    constexpr size_t nb_threads = 1;
+    constexpr size_t nb_threads = 4;
 
     // Camera
     auto cam_origin = structures::Vec3({ 0, 0, 0 });
@@ -33,8 +33,8 @@ int raytracer()
 
     // environment::scene_mesh(scene, environment::wood_wall,
     // environment::lion);
-    environment::scene_sphere_texture_reflect_height(scene,
-                                                     environment::wood_wall);
+    environment::scene_sphere_texture_reflect(scene,
+                                              environment::seamless_pebbles);
     auto stop_create = std::chrono::high_resolution_clock::now();
     auto time_create =
         std::chrono::duration_cast<std::chrono::seconds>(stop_create - start);
