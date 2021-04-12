@@ -36,26 +36,26 @@ namespace environment
                                                                       : sol1;
         if (t < 0)
             return res;
-        // t -= 0.4;
         auto i = r.at(t);
+        auto u_v = parametrics(i);
         auto map_u_v = map_parametrics(i);
         auto sphere_normal = normal(i);
-        auto sphere_tangent = tangent(map_u_v.second);
+        auto sphere_tangent = tangent(u_v.second);
 
         auto height_intersection = mat_->get_height_intersection(
-            i, sphere_normal, sphere_tangent, sphere_normal ^ sphere_tangent);
-        map_u_v = map_parametrics(height_intersection);
-        sphere_normal = normal(height_intersection);
-        sphere_tangent = tangent(map_u_v.second);
+            i, sphere_normal, sphere_tangent, sphere_normal ^ sphere_tangent,
+            structures::FixedMatrix<1, 2>({ map_u_v.first, map_u_v.second }));
 
-        auto m_n = map_normal(sphere_normal, sphere_tangent, map_u_v.first,
-                              map_u_v.second);
+        auto m_n =
+            map_normal(sphere_normal, sphere_tangent, height_intersection.first,
+                       height_intersection.second);
 
         res = std::make_optional<>(intersection_record{});
         res->t = t;
         res->normal = m_n;
-        res->comps = get_components(map_u_v.first, map_u_v.second);
-        res->reflected = reflect(height_intersection, m_n);
+        res->comps = get_components(height_intersection.first,
+                                    height_intersection.second);
+        res->reflected = reflect(i, m_n);
 
         return res;
     }
@@ -104,7 +104,8 @@ namespace environment
     Sphere::map_parametrics(const structures::Vec3 &p) const
     {
         auto u_v = parametrics(p);
-        return std::make_pair<>(u_v.first / M_PI, u_v.second / (2 * M_PI));
+        return std::make_pair<>(std::fmod(u_v.first / M_PI, 1),
+                                std::fmod(u_v.second / (2 * M_PI), 1));
     }
 
     std::optional<intersection_record> Plane::intersection(const Ray &r) const

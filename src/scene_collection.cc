@@ -225,7 +225,7 @@ namespace environment
             std::make_shared<Classic_Material>(
                 std::make_shared<Image_Texture>(std::get<0>(m), 1., 0.7, 0.7),
                 std::make_shared<Normal_Map>(std::get<1>(m))),
-            1.));
+            0.5));
         s.add_object(std::make_shared<Sphere>(
             structures::Vec3({ 0.5, -2, 2.4 }),
             std::make_shared<Classic_Material>(std::make_shared<Uniform_Metal>(
@@ -243,9 +243,9 @@ namespace environment
             structures::Vec3({ 1.5, -2, 0 }),
             std::make_shared<Relief_Material>(
                 std::make_shared<Image_Texture>(std::get<0>(m), 1., 0.7, 0.7),
-                std::make_shared<Normal_Map>(std::get<1>(m)),
+                std::make_shared<Identity_Map>(),
                 std::make_shared<Image_Texture>(std::get<2>(m), 0., 0., 0.)),
-            1.);
+            0.5);
         s.add_object(sphere);
         s.add_object(std::make_shared<Sphere>(
             structures::Vec3({ 0.5, -2, 2.4 }),

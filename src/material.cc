@@ -21,19 +21,22 @@ namespace environment
     {
         return nmap_->normal(n, t, b, u, v);
     }
-    structures::Vec3 Classic_Material::get_height_intersection(
+    std::pair<double, double> Classic_Material::get_height_intersection(
         const structures::Vec3 &p, const structures::Vec3 &n,
-        const structures::Vec3 &t, const structures::Vec3 &b) const
+        const structures::Vec3 &t, const structures::Vec3 &b,
+        const structures::FixedMatrix<1, 2> &uv) const
     {
         (void)b;
         (void)n;
         (void)t;
-        return p;
+        return obj_->map_parametrics(p);
     }
 
-    structures::Vec3 Relief_Material::find_intersection(
+    /*
+    std::pair<double, double> Relief_Material::find_intersection(
         const structures::Vec3 &p, const structures::FixedMatrix<3, 3> &t2w,
-        const structures::FixedMatrix<3, 3> &w2t) const
+        const structures::FixedMatrix<3, 3> &w2t,
+        const structures::FixedMatrix<1, 2> &uv) const
     {
         const int lin_search_steps = 10;
         const int bin_search_steps = 5;
@@ -50,9 +53,12 @@ namespace environment
         {
             cur_fac += step;
             best_height -= step_depth;
-            auto u_v = obj_->map_parametrics((a * cur_fac) * t2w);
-            if (std::get<0>(hmap_->get_components(u_v.first, u_v.second)).r()
-                >= best_height)
+            auto p_vec = a * cur_fac;
+            // p_vec[2] = 0;
+            auto u_v = obj_->map_parametrics(p_vec * t2w);
+            auto map_height =
+                std::get<0>(hmap_->get_components(u_v.first, u_v.second)).r();
+            if (map_height >= best_height)
             {
                 best_height += step_depth;
                 cur_fac -= step;
@@ -68,18 +74,70 @@ namespace environment
             cur_fac += step;
             best_height -= step_depth;
 
-            auto u_v = obj_->map_parametrics((a * cur_fac) * t2w);
-            if (std::get<0>(hmap_->get_components(u_v.first, u_v.second)).r()
-                >= best_height)
+            auto p_vec = a * cur_fac;
+            // p_vec[2] = 0;
+            auto u_v = obj_->map_parametrics(p_vec * t2w);
+            auto map_height =
+                std::get<0>(hmap_->get_components(u_v.first, u_v.second)).r();
+            if (map_height >= best_height)
             {
-                step_depth = -step_depth;
-                step = -step;
+                step_depth = step_depth > 0 ? -step_depth : step_depth;
+                step = step > 0 ? -step : step;
             }
         }
 
         auto t_res = a * cur_fac;
-        t_res[2] = 0; // Projecting on tangent plane (?)
-        return t_res * t2w;
+        // t_res[2] = 0; // Projecting on tangent plane (?)
+        return obj_->map_parametrics(t_res * t2w);
+    }
+    */
+
+    std::pair<double, double> Relief_Material::find_intersection(
+        const structures::Vec3 &p, const structures::FixedMatrix<3, 3> &t2w,
+        const structures::FixedMatrix<3, 3> &w2t,
+        const structures::FixedMatrix<1, 2> &uv) const
+    {
+        auto s = structures::unit(structures::unit(p) * w2t);
+        auto ds = structures::FixedMatrix<1, 2>(
+            { s[0] * 0.05 / s[2], s[1] * 0.05 / s[2] });
+        auto dp = uv;
+
+        const int lin_search_steps = 10;
+        const int bin_search_steps = 5;
+        double step_depth = 1. / (double)lin_search_steps;
+        double step = step_depth;
+        double depth = 1;
+        double best_depth = 1;
+
+        for (int i = 0; i < lin_search_steps - 1; ++i)
+        {
+            depth -= step;
+            auto cur_uv = dp + ds * depth;
+            auto comps = hmap_->get_components(
+                cur_uv[0],
+                cur_uv[1]); // TODO: Remove sphere harcoding
+            if (1 - std::get<0>(comps).r() <= depth)
+                best_depth = depth;
+        }
+        depth = best_depth - step;
+        for (int i = 0; i < bin_search_steps; ++i)
+        {
+            step *= 0.5;
+            auto cur_uv = dp + ds * depth;
+            auto comps = hmap_->get_components(
+                cur_uv[0],
+                cur_uv[1]); // TODO: Remove sphere hardcoding
+            if (depth >= 1 - std::get<0>(comps).r())
+            {
+                best_depth = depth;
+                depth -= 2 * step;
+            }
+            depth += step;
+        }
+
+        auto new_uv = dp + ds * best_depth;
+        return std::make_pair(new_uv[0],
+                              new_uv[1]); // TODO: Remove sphere hardcoding
     }
 
     const structures::FixedMatrix<3, 3>
@@ -101,16 +159,17 @@ namespace environment
 
     double Relief_Material::b_factor(const structures::Vec3 &a) const
     {
-        return 1 - 1 / a[2];
+        return 1 + 1 / a[2];
     }
 
-    structures::Vec3 Relief_Material::get_height_intersection(
+    std::pair<double, double> Relief_Material::get_height_intersection(
         const structures::Vec3 &p, const structures::Vec3 &n,
-        const structures::Vec3 &t, const structures::Vec3 &b) const
+        const structures::Vec3 &t, const structures::Vec3 &b,
+        const structures::FixedMatrix<1, 2> &uv) const
     {
         auto t2w_matrix = t2w(n, t, b);
         auto w2t_matrix = w2t(n, t, b);
-        auto intersection = find_intersection(p, t2w_matrix, w2t_matrix);
+        auto intersection = find_intersection(p, t2w_matrix, w2t_matrix, uv);
         return intersection;
     }
 
