@@ -274,7 +274,21 @@ namespace environment
             , triangles_{ triangles }
             , bounding_box_{ std::make_shared<Sphere>(bb_center, mat,
                                                       bb_radius) }
-        {}
+        {
+            if (triangles_.size() > 0)
+            {
+                for (size_t i = 0; i < triangles_.size() - 1; ++i)
+                {
+                    std::cout << '\r' << i << " out of " << triangles_.size()
+                              << " triangles";
+                    for (size_t j = i + 1; j < triangles_.size(); ++j)
+                        if (triangles_[i]->normal() != triangles_[j]->normal())
+                            triangles_[i]->fix_normals(*(triangles_[j]));
+                    triangles_[i]->fix_normals();
+                }
+                triangles_[triangles_.size() - 1]->fix_normals();
+            }
+        }
         Mesh(std::shared_ptr<Material> mat, const char *pth,
              structures::Vec3 center, double bb_radius);
 

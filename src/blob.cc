@@ -95,20 +95,6 @@ namespace environment
             build_triangles(c, triangle_table_[index], res);
         }
 
-        if (res.size() > 0)
-        {
-            for (size_t i = 0; i < res.size() - 1; ++i)
-            {
-                std::cout << '\r' << i << " out of " << res.size()
-                          << " triangles";
-                for (size_t j = i + 1; j < res.size(); ++j)
-                    if (res[i]->normal() != res[j]->normal())
-                        res[i]->fix_normals(*(res[j]));
-                res[i]->fix_normals();
-            }
-            res[res.size() - 1]->fix_normals();
-        }
-
         // return std::make_shared<Mesh>(mesh(res.begin(), res.end()), center_,
         //                               std::sqrt(3) * side_);
         return std::make_shared<Mesh>(res, mat_, center_, std::sqrt(3) * side_);
