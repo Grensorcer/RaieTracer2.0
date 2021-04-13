@@ -24,4 +24,10 @@ namespace utils
         return d(generator);
     }
 
+    double fmodulo(double a, double b)
+    {
+        auto r = std::fmod(a, b);
+        return r < 0 ? r + b : r;
+    }
+
 } // namespace utils

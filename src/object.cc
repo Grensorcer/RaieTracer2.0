@@ -3,6 +3,8 @@
 #include <cmath>
 #include <numeric>
 
+#include "utils.hh"
+
 namespace environment
 {
     std::optional<intersection_record> Sphere::intersection(const Ray &r) const
@@ -35,21 +37,99 @@ namespace environment
                                                                       : sol1;
         if (t < 0)
             return res;
-        // t -= 0.4;
         auto i = r.at(t);
-        auto u_v = parametrics(i);
+        auto uv = parametrics(i);
+        auto map_uv = map_parametrics(i);
         auto sphere_normal = normal(i);
-        auto sphere_tangent = tangent(u_v.second);
-        auto m_n =
-            map_normal(sphere_normal, sphere_tangent, u_v.first, u_v.second);
+        auto sphere_tangent = tangent(uv.second);
+        auto m_n = map_normal(sphere_normal, sphere_tangent, map_uv.first,
+                              map_uv.second);
 
         res = std::make_optional<>(intersection_record{});
         res->t = t;
         res->normal = m_n;
-        res->comps = get_components(u_v.first, u_v.second);
+        res->comps = get_components(map_uv.first, map_uv.second);
         res->reflected = reflect(i, res->normal);
 
         return res;
+    }
+
+    std::optional<intersection_record>
+    Relief_Sphere::intersection(const Ray &r) const
+    {
+        // Translation on ray to center on the sphere
+        structures::Vec3 oc = r.origin() - center();
+        double a = r.direction() * r.direction();
+        double b = 2. * (r.direction() * oc);
+        double c = oc * oc - radius() * radius();
+
+        double discriminant = b * b - 4 * (a * c);
+        std::optional<intersection_record> res;
+        if (discriminant < 0)
+            return res;
+
+        double s_discriminant = std::sqrt(discriminant);
+        a *= 2;
+        double sol1 = (-b - s_discriminant) / a;
+        double sol2 = (-b + s_discriminant) / a;
+        double t;
+        structures::Vec3 p1 = r.at(sol1);
+        structures::Vec3 p2 = r.at(sol2);
+        // Distance between two points
+        if (sol1 < 0)
+            t = sol2;
+        else if (sol2 < 0)
+            t = sol1;
+        else
+            t = structures::norm(oc - p1) > structures::norm(oc - p2) ? sol2
+                                                                      : sol1;
+        if (t < 0)
+            return res;
+        auto i = r.at(t);
+        auto uv = parametrics(i);
+        auto map_uv = map_parametrics(i);
+        auto sphere_normal = normal(i);
+        auto sphere_tangent = tangent(uv.second);
+        const double magic_depth_coef = 0.025;
+        structures::FixedMatrix<3, 3> w2t_matrix =
+            w2t(sphere_normal, sphere_tangent, sphere_normal ^ sphere_tangent);
+        auto t_i = i * w2t_matrix;
+        auto dir_t_i = structures::FixedMatrix<1, 2>(
+            { t_i[0] * magic_depth_coef / t_i[2],
+              t_i[1] * magic_depth_coef / t_i[2] });
+        auto tex_t_i =
+            structures::FixedMatrix<1, 2>({ map_uv.first, map_uv.second });
+
+        auto di = mat_->get_depth_intersection(tex_t_i, dir_t_i);
+        auto new_uv = tex_t_i + dir_t_i * di;
+        new_uv[0] = utils::fmodulo(new_uv[0], 1);
+        new_uv[1] = utils::fmodulo(new_uv[1], 1);
+
+        auto m_n =
+            map_normal(sphere_normal, sphere_tangent, new_uv[0], new_uv[1]);
+
+        res = std::make_optional<>(intersection_record{});
+        res->t = t;
+        res->normal = m_n;
+        res->comps = get_components(new_uv[0], new_uv[1]);
+        res->reflected = reflect(i, res->normal);
+
+        res->relief = true;
+        res->di = di;
+        res->light_tex_t_i = new_uv;
+        res->w2t = w2t_matrix;
+        res->mat = mat_;
+
+        return res;
+    }
+
+    structures::FixedMatrix<3, 3>
+    Relief_Sphere::w2t(const structures::Vec3 &n, const structures::Vec3 &t,
+                       const structures::Vec3 &b) const
+    {
+        return structures::FixedMatrix<3, 3>({ { t[0], b[0], n[0] },
+                                               { t[1], b[1], n[1] },
+                                               { t[2], b[2], n[2] } });
     }
 
     std::pair<double, double>
@@ -80,16 +160,24 @@ namespace environment
         return mat_->reflect(p, n);
     }
 
+    std::pair<double, double>
+    Sphere::map_parametrics(const structures::Vec3 &p) const
+    {
+        auto uv = parametrics(p);
+        return std::make_pair(utils::fmodulo(uv.first / M_PI, 1),
+                              utils::fmodulo(uv.second / (2 * M_PI), 1));
+    }
+
     structures::Vec3 Sphere::map_normal(const structures::Vec3 &n,
                                         const structures::Vec3 &t, double u,
                                         double v) const
     {
-        return mat_->normal(n, t, n ^ t, u / M_PI, v / (2 * M_PI));
+        return mat_->normal(n, t, n ^ t, u, v);
     }
 
     const components Sphere::get_components(double u, double v) const
     {
-        return mat_->get_components(u / M_PI, v / (2 * M_PI));
+        return mat_->get_components(u, v);
     }
 
     std::optional<intersection_record> Plane::intersection(const Ray &r) const

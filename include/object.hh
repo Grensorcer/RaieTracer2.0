@@ -20,6 +20,12 @@ namespace environment
         structures::Vec3 normal;
         structures::Vec3 reflected;
         components comps;
+
+        bool relief = false;
+        double di;
+        structures::FixedMatrix<1, 2> light_tex_t_i;
+        structures::FixedMatrix<3, 3> w2t;
+        std::shared_ptr<environment::Material> mat;
     };
 
     class Object
@@ -54,12 +60,14 @@ namespace environment
 
         // const structures::Vec3 at(double i, double j) const override;
 
-        std::optional<intersection_record>
+        virtual std::optional<intersection_record>
         intersection(const Ray &r) const override;
 
         structures::Vec3 reflect(const structures::Vec3 &p,
                                  const structures::Vec3 &n) const;
         std::pair<double, double> parametrics(const structures::Vec3 &p) const;
+        std::pair<double, double>
+        map_parametrics(const structures::Vec3 &p) const;
         structures::Vec3 normal(const structures::Vec3 &p) const;
         structures::Vec3 tangent(double v) const;
         structures::Vec3 map_normal(const structures::Vec3 &n,
@@ -76,6 +84,23 @@ namespace environment
     protected:
         double r_;
         structures::Vec3 center_;
+    };
+
+    class Relief_Sphere : public Sphere
+    {
+    public:
+        Relief_Sphere(const structures::Vec3 &center,
+                      std::shared_ptr<Material> mat, const double &radius)
+            : Sphere(center, mat, radius)
+        {}
+
+        std::optional<intersection_record>
+        intersection(const Ray &r) const override;
+
+    protected:
+        structures::FixedMatrix<3, 3> w2t(const structures::Vec3 &n,
+                                          const structures::Vec3 &t,
+                                          const structures::Vec3 &b) const;
     };
 
     class Triangle : public Object

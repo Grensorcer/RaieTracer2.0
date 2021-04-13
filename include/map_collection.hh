@@ -26,6 +26,6 @@ namespace environment
     constexpr maps seamless_pebbles =
         std::make_tuple<>("../data/maps/Seamless_Pebbles_Texture.jpg",
                           "../data/maps/Seamless_Pebbles_Texture_NORMAL.jpg",
-                          "../data/maps/Seamless_Pebbles_Texture_DISP.png");
+                          "../data/maps/Seamless_Pebbles_Texture_DISP.jpg");
 
 } // namespace environment

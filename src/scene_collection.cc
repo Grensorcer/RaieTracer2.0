@@ -236,4 +236,24 @@ namespace environment
 
         return s;
     }
+
+    Scene &scene_relief_sphere_texture_reflect(Scene &s, const maps &m)
+    {
+        s.add_object(std::make_shared<Relief_Sphere>(
+            structures::Vec3({ 1.5, -2, 0 }),
+            std::make_shared<Relief_Material>(
+                std::make_shared<Image_Texture>(std::get<0>(m), 1., 0.7, 0.7),
+                std::make_shared<Normal_Map>(std::get<1>(m)),
+                std::make_shared<Image_Texture>(std::get<2>(m), 0, 0, 0)),
+            1.));
+        s.add_object(std::make_shared<Sphere>(
+            structures::Vec3({ 0.5, -2, 2.4 }),
+            std::make_shared<Classic_Material>(std::make_shared<Uniform_Metal>(
+                display::Colour(0.5, 0.5, 0.5), 1., 0.01, 0.01)),
+            1.3));
+        s.add_light(
+            std::make_shared<Point_Light>(structures::Vec3({ 0, -1, 1 }), 1.));
+
+        return s;
+    }
 } // namespace environment

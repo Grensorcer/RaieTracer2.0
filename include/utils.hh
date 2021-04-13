@@ -10,4 +10,5 @@ namespace utils
     double random_double(double min, double max);
     structures::Vec3 random_vec3();
     structures::Vec3 random_vec3(double min, double max);
+    double fmodulo(double a, double b);
 } // namespace utils
