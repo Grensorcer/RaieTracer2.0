@@ -33,8 +33,8 @@ int raytracer()
 
     // environment::scene_mesh(scene, environment::wood_wall,
     // environment::lion);
-    environment::scene_sphere_texture_reflect(scene,
-                                              environment::paper_wrinkled);
+    environment::scene_relief_sphere_texture_reflect(
+        scene, environment::seamless_pebbles);
     auto stop_create = std::chrono::high_resolution_clock::now();
     auto time_create =
         std::chrono::duration_cast<std::chrono::seconds>(stop_create - start);

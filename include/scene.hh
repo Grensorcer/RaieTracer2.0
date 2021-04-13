@@ -42,6 +42,8 @@ namespace environment
         display::Colour compute_light_input(const Vec3 &intersection_point,
                                             const intersection_record &i_r,
                                             int depth) const;
+        bool light_depth_intersection(const intersection_record &i_r,
+                                      const structures::Vec3 &light_dir) const;
 
         display::Colour compute_sky(const Ray &r) const;
 

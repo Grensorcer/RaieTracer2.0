@@ -24,6 +24,22 @@ namespace environment
             });
     }
 
+    bool
+    Scene::light_depth_intersection(const intersection_record &i_r,
+                                    const structures::Vec3 &light_dir) const
+    {
+        if (!i_r.relief)
+            return false;
+        const auto magic_depth_coef = 0.025;
+        auto t_i = (-light_dir) * i_r.w2t;
+        auto dir_t_i = structures::FixedMatrix<1, 2>(
+            { t_i[0] * magic_depth_coef / t_i[2],
+              t_i[1] * magic_depth_coef / t_i[2] });
+        auto tex_t_i = i_r.light_tex_t_i - dir_t_i * i_r.di;
+        auto l_di = i_r.mat->get_depth_intersection(tex_t_i, dir_t_i);
+        return l_di < i_r.di - 0.05;
+    }
+
     display::Colour Scene::compute_light_input(const Vec3 &intersection_point,
                                                const intersection_record &i_r,
                                                int depth) const
@@ -38,10 +54,11 @@ namespace environment
             auto light_ray =
                 Ray(intersection_point + light_dir * 0.05, light_dir);
             auto light_intersection = find_closest_intersection(light_ray);
-            if (!light_intersection
-                || structures::norm(light_ray.at(light_intersection->t)
-                                    - light_ray.origin())
-                    >= light_distance)
+            if ((!light_intersection
+                 || structures::norm(light_ray.at(light_intersection->t)
+                                     - light_ray.origin())
+                     >= light_distance)
+                && !light_depth_intersection(i_r, light_dir))
             {
                 // Diffusion
                 auto diff_angle = i_r.normal * light_dir;
@@ -52,11 +69,6 @@ namespace environment
                 auto s_sp = i_r.reflected * light_dir;
                 if (s_sp > 0)
                 {
-                    // std::cout << "SPECU: " << s_sp << '\n';
-                    // std::cout << "POW: " << std::get<3>(i_r.comps) << '\n';
-                    // std::cout << "GIVES: " << pow(s_sp,
-                    // std::get<3>(i_r.comps))
-                    // << '\n';
                     spec += pow(s_sp, std::get<3>(i_r.comps))
                         * light->intensity() / light_distance;
                 }
