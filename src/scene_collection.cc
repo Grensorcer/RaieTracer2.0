@@ -51,7 +51,7 @@ namespace environment
     {
         size_t nb = 6;
         auto txt = std::make_shared<Image_Texture>(
-            "../data/Paper_Wrinkled_001_basecolor.jpg", 1., 1., 1.);
+            "../data/Paper_Wrinkled_001_basecolor.jpg", 1., 1., 1., 0);
         auto n_m = std::make_shared<Normal_Map>(
             "../data/Paper_Wrinkled_001_normal.jpg");
         auto mat = std::make_shared<Classic_Material>(txt, n_m);
@@ -162,7 +162,8 @@ namespace environment
 
     Scene &scene_blob(Scene &s, const maps &m)
     {
-        auto txt = std::make_shared<Image_Texture>(std::get<0>(m), 1., 1., 1.);
+        auto txt =
+            std::make_shared<Image_Texture>(std::get<0>(m), 1., 1., 1., 0);
         auto n_m = std::make_shared<Normal_Map>(std::get<1>(m));
         auto b = Blob(std::make_shared<Classic_Material>(txt, n_m),
                       structures::Vec3({ { 0, -4, 0 } }), 0.15, 2, 8);
@@ -196,7 +197,8 @@ namespace environment
 
     Scene &scene_mesh(Scene &s, const maps &m, const model &mod)
     {
-        auto txt = std::make_shared<Image_Texture>(std::get<0>(m), 1., 1., 1.);
+        auto txt =
+            std::make_shared<Image_Texture>(std::get<0>(m), 1., 1., 1., 0.);
         auto n_m = std::make_shared<Normal_Map>(std::get<1>(m));
         auto mat = std::make_shared<Classic_Material>(txt, n_m);
         auto cup = std::make_shared<Mesh>(
@@ -213,7 +215,7 @@ namespace environment
         */
 
         s.add_light(std::make_shared<Point_Light>(
-            structures::Vec3({ { -1, -0.5, 2.5 } }), 1));
+            structures::Vec3({ { 0, 0, 0 } }), 4));
 
         return s;
     }
@@ -223,7 +225,8 @@ namespace environment
         s.add_object(std::make_shared<Sphere>(
             structures::Vec3({ 1.5, -2, 0 }),
             std::make_shared<Classic_Material>(
-                std::make_shared<Image_Texture>(std::get<0>(m), 1., 0.7, 0.7),
+                std::make_shared<Image_Texture>(std::get<0>(m), 1., 0.7, 0.7,
+                                                0.1),
                 std::make_shared<Normal_Map>(std::get<1>(m))),
             1.));
         s.add_object(std::make_shared<Sphere>(
@@ -242,9 +245,10 @@ namespace environment
         s.add_object(std::make_shared<Relief_Sphere>(
             structures::Vec3({ 1.5, -2, 0 }),
             std::make_shared<Relief_Material>(
-                std::make_shared<Image_Texture>(std::get<0>(m), 1., 0.7, 0.7),
+                std::make_shared<Image_Texture>(std::get<0>(m), 1., 0.7, 0.7,
+                                                0),
                 std::make_shared<Normal_Map>(std::get<1>(m)),
-                std::make_shared<Image_Texture>(std::get<2>(m), 0, 0, 0)),
+                std::make_shared<Image_Texture>(std::get<2>(m), 0, 0, 0, 0)),
             1.));
         s.add_object(std::make_shared<Sphere>(
             structures::Vec3({ 0.5, -2, 2.4 }),

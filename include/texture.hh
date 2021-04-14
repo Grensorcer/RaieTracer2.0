@@ -62,11 +62,13 @@ namespace environment
     {
     public:
         Image_Texture(const Image_Texture &txt) = default;
-        Image_Texture(const display::Image &im, double kd, double ks, double ns)
+        Image_Texture(const display::Image &im, double kd, double ks, double ns,
+                      double reflexion)
             : im_{ im }
             , kd_{ kd }
             , ks_{ ks }
             , ns_{ ns }
+            , reflexion_{ reflexion }
         {}
 
         std::tuple<display::Colour, double, double, double>
@@ -79,5 +81,6 @@ namespace environment
         double kd_;
         double ks_;
         double ns_;
+        double reflexion_;
     };
 } // namespace environment

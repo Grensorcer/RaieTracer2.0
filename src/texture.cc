@@ -38,9 +38,7 @@ namespace environment
     structures::Vec3 Image_Texture::reflect(const structures::Vec3 &p,
                                             const structures::Vec3 &n) const
     {
-        (void)p;
-        (void)n;
-        return structures::Vec3({ { 0, 0, 0 } });
+        return structures::unit(reflexion_ * (p - n * 2 * p * n));
     }
 
     std::tuple<display::Colour, double, double, double>
