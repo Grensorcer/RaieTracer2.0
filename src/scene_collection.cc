@@ -197,7 +197,7 @@ namespace environment
             "../data/Seamless_Pebbles_Texture.jpg", 1., 1., 1.);
         auto n_m = std::make_shared<Normal_Map>(
             "../data/Seamless_Pebbles_Texture_NORMAL.jpg");
-        auto cup = std::make_shared<Mesh>(txt, n_m, "../data/new_froggy.stl",
+        auto cup = std::make_shared<Mesh>(txt, n_m, "../data/lion.stl",
                                           structures::Vec3({ 0, -3, 0 }), 1.2);
 
         s.add_object(cup);

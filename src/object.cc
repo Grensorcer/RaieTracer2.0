@@ -229,12 +229,26 @@ namespace environment
             const double *c2 = m.tri_corner_coords(i, 1);
             const double *c3 = m.tri_corner_coords(i, 2);
 
-            auto triangle = std::make_shared<Triangle>(
+            auto triangle = std::make_shared<Smooth_Triangle>(
                 txt, structures::Vec3({ c1[0], c1[1], c1[2] }) + center,
                 structures::Vec3({ c2[0], c2[1], c2[2] }) + center,
                 structures::Vec3({ c3[0], c3[1], c3[2] }) + center);
 
             triangles_.emplace_back(triangle);
+        }
+
+        if (triangles_.size() > 0)
+        {
+            for (size_t i = 0; i < triangles_.size() - 1; ++i)
+            {
+                std::cout << '\r' << i << " out of " << triangles_.size()
+                          << " triangles";
+                for (size_t j = i + 1; j < triangles_.size(); ++j)
+                    if (triangles_[i]->normal() != triangles_[j]->normal())
+                        triangles_[i]->fix_normals(*(triangles_[j]));
+                triangles_[i]->fix_normals();
+            }
+            triangles_[triangles_.size() - 1]->fix_normals();
         }
     }
 
@@ -252,12 +266,26 @@ namespace environment
             const double *c2 = m.tri_corner_coords(i, 1);
             const double *c3 = m.tri_corner_coords(i, 2);
 
-            auto triangle = std::make_shared<Triangle>(
+            auto triangle = std::make_shared<Smooth_Triangle>(
                 txt, structures::Vec3({ c1[0], c1[1], c1[2] }) + center,
                 structures::Vec3({ c2[0], c2[1], c2[2] }) + center,
                 structures::Vec3({ c3[0], c3[1], c3[2] }) + center);
 
             triangles_.emplace_back(triangle);
+        }
+
+        if (triangles_.size() > 0)
+        {
+            for (size_t i = 0; i < triangles_.size() - 1; ++i)
+            {
+                std::cout << '\r' << i << " out of " << triangles_.size()
+                          << " triangles";
+                for (size_t j = i + 1; j < triangles_.size(); ++j)
+                    if (triangles_[i]->normal() != triangles_[j]->normal())
+                        triangles_[i]->fix_normals(*(triangles_[j]));
+                triangles_[i]->fix_normals();
+            }
+            triangles_[triangles_.size() - 1]->fix_normals();
         }
     }
 

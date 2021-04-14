@@ -287,11 +287,13 @@ namespace environment
     };
 
     using mesh = std::vector<std::shared_ptr<Triangle>>;
+    using smooth_mesh = std::vector<std::shared_ptr<Smooth_Triangle>>;
 
     class Mesh : public Object
     {
     public:
-        Mesh(mesh triangles, structures::Vec3 bb_center, double bb_radius)
+        Mesh(smooth_mesh triangles, structures::Vec3 bb_center,
+             double bb_radius)
             : Object(std::make_shared<Uniform_Smooth>(display::Colour(0, 0, 0),
                                                       0, 0, 0))
             , triangles_{ triangles }
@@ -307,7 +309,7 @@ namespace environment
         intersection(const Ray &r) const override;
 
     protected:
-        mesh triangles_;
+        smooth_mesh triangles_;
         std::shared_ptr<Sphere> bounding_box_;
     };
 

@@ -33,5 +33,6 @@
 
 build/
 debug/
+renders/
 .clang-format
 compile_commands.json
