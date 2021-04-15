@@ -13,7 +13,8 @@
 
 namespace environment
 {
-    using components = std::tuple<display::Colour, double, double, double>;
+    using components =
+        std::tuple<display::Colour, double, double, double, double>;
     struct intersection_record
     {
         double t;

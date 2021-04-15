@@ -12,7 +12,7 @@ namespace environment
         virtual ~Texture() = default;
         virtual structures::Vec3 reflect(const structures::Vec3 &p,
                                          const structures::Vec3 &n) const = 0;
-        virtual std::tuple<display::Colour, double, double, double>
+        virtual std::tuple<display::Colour, double, double, double, double>
         get_components(double u, double v) const = 0;
     };
 
@@ -20,14 +20,16 @@ namespace environment
     {
     public:
         Uniform_Texture(const Uniform_Texture &txt) = default;
-        Uniform_Texture(display::Colour c, double kd, double ks, double ns)
+        Uniform_Texture(display::Colour c, double kd, double ks, double ns,
+                        double reflexion)
             : c_{ c }
             , kd_{ kd }
             , ks_{ ks }
             , ns_{ ns }
+            , reflexion_{ reflexion }
         {}
 
-        std::tuple<display::Colour, double, double, double>
+        std::tuple<display::Colour, double, double, double, double>
         get_components(double u, double v) const override;
 
     protected:
@@ -35,6 +37,7 @@ namespace environment
         double kd_;
         double ks_;
         double ns_;
+        double reflexion_;
     };
 
     class Uniform_Smooth : public Uniform_Texture
@@ -71,7 +74,7 @@ namespace environment
             , reflexion_{ reflexion }
         {}
 
-        std::tuple<display::Colour, double, double, double>
+        std::tuple<display::Colour, double, double, double, double>
         get_components(double u, double v) const override;
         structures::Vec3 reflect(const structures::Vec3 &p,
                                  const structures::Vec3 &n) const override;

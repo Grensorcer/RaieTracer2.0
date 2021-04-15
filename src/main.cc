@@ -16,15 +16,15 @@ int raytracer()
     auto start = std::chrono::high_resolution_clock::now();
     // Image
     const double aspect_ratio = 16. / 9.;
-    const size_t width = 1920;
+    const size_t width = 3840;
     const size_t height = width / aspect_ratio;
     auto im = display::Image(height, width);
-    constexpr size_t sample_per_pixel = 3;
-    constexpr size_t nb_threads = 6;
+    constexpr size_t sample_per_pixel = 8;
+    constexpr size_t nb_threads = 8;
 
     // Camera
     auto cam_origin = structures::Vec3({ 0, 0, 0 });
-    auto v_fov = 2.;
+    auto v_fov = 1.;
     auto h_fov = aspect_ratio * v_fov;
     auto cam = environment::Camera(
         cam_origin, structures::Vec3({ { 0, 0, 1 } }),
@@ -33,8 +33,7 @@ int raytracer()
 
     // environment::scene_mesh(scene, environment::wood_wall,
     // environment::lion);
-    environment::scene_relief_sphere_texture_reflect(
-        scene, environment::seamless_pebbles);
+    environment::scene_normal(scene, environment::metal_gate);
     auto stop_create = std::chrono::high_resolution_clock::now();
     auto time_create =
         std::chrono::duration_cast<std::chrono::seconds>(stop_create - start);
@@ -56,7 +55,7 @@ int raytracer()
                             / (height - 1),
                         (static_cast<double>(j) + utils::random_double())
                             / (width - 1));
-                    color += scene.cast_ray(ray, 4);
+                    color += scene.cast_ray(ray, 8);
                 }
 
                 im.set_pixel(i, j, color / sample_per_pixel);

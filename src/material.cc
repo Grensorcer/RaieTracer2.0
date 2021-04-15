@@ -9,7 +9,7 @@ namespace environment
     {
         return txt_->reflect(p, n);
     }
-    std::tuple<display::Colour, double, double, double>
+    std::tuple<display::Colour, double, double, double, double>
     Material::get_components(double u, double v) const
     {
         return txt_->get_components(u, v);

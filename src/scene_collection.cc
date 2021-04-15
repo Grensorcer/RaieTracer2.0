@@ -10,6 +10,7 @@ namespace environment
         s.add_light(std::make_shared<Point_Light>(
             structures::Vec3({ { -3, -3, 4 } }), 3.));
 
+        /*
         s.add_object(std::make_shared<Sphere>(
             structures::Vec3({ { -2, -3, -1 } }),
             std::make_shared<Classic_Material>(std::make_shared<Uniform_Metal>(
@@ -25,12 +26,10 @@ namespace environment
             std::make_shared<Classic_Material>(std::make_shared<Uniform_Smooth>(
                 display::Colour(1., 1., 0.), 0.5, 1., 2.)),
             2.));
-        /*
         s.add_object(std::make_shared<Sphere>(
             structures::Vec3({ { 0, -1, -101.5 } }),
             new Uniform_Matte(display::Colour(0, 0.33,
         0.1), 1., 1., 1.), 100.));
-        */
         s.add_object(std::make_shared<Plane>(
             structures::Vec3({ { 0, 0, -1 } }),
             std::make_shared<Classic_Material>(std::make_shared<Uniform_Matte>(
@@ -43,6 +42,7 @@ namespace environment
             structures::Vec3({ { -2.5, -4.5, 1 } }),
             structures::Vec3({ { -2, -5, -1 } }),
             structures::Vec3({ { -4, -4, -1 } })));
+        */
 
         return s;
     }
@@ -75,7 +75,7 @@ namespace environment
     Scene &scene_smooth_triangles(Scene &s)
     {
         auto txt = std::make_shared<Uniform_Smooth>(
-            display::Colour(0.5, 0.1, 0.5), 1., 1., 1.);
+            display::Colour(0.5, 0.1, 0.5), 1., 1., 1., 1);
         auto n_m = std::make_shared<Normal_Map>(
             "../data/Paper_Wrinkled_001_normal.jpg");
         auto mat = std::make_shared<Classic_Material>(txt, n_m);
@@ -102,17 +102,17 @@ namespace environment
         s.add_object(std::make_shared<Sphere>(
             structures::Vec3(),
             std::make_shared<Classic_Material>(std::make_shared<Uniform_Smooth>(
-                display::Colour(0.2, 0.3, 0.7), 1., 0.5, 0.5)),
+                display::Colour(0.2, 0.3, 0.7), 1., 0.5, 0.5, 1)),
             1.));
         s.add_object(std::make_shared<Triangle>(
             std::make_shared<Classic_Material>(std::make_shared<Uniform_Metal>(
-                display::Colour(1., 1., 1.), 0.5, 0.1, 0.1)),
+                display::Colour(1., 1., 1.), 0.5, 0.1, 0.1, 1)),
             structures::Vec3({ { -1, -2, -0.5 } }),
             structures::Vec3({ { 1, -2, -0.5 } }),
             structures::Vec3({ { 0, -2, 1.5 } })));
         s.add_object(std::make_shared<Triangle>(
             std::make_shared<Classic_Material>(std::make_shared<Uniform_Metal>(
-                display::Colour(0.5, 1., 1.), 0.5, 0.1, 0.1)),
+                display::Colour(0.5, 1., 1.), 0.5, 0.1, 0.1, 1)),
             structures::Vec3({ { -2, 0.5, 3.5 } }),
             structures::Vec3({ { 2, 0.5, 3.5 } }),
             structures::Vec3({ { 0, 2, -1.5 } })));
@@ -128,12 +128,12 @@ namespace environment
         s.add_object(std::make_shared<Sphere>(
             structures::Vec3({ { 1.5, -2, 0 } }),
             std::make_shared<Classic_Material>(std::make_shared<Uniform_Metal>(
-                display::Colour(0.2, 0.3, 0.7), 1., 0.5, 0.5)),
+                display::Colour(0.2, 0.3, 0.7), 1., 0.5, 0.5, 1)),
             1.));
         s.add_object(std::make_shared<Sphere>(
             structures::Vec3({ { -1.5, -2, 0 } }),
             std::make_shared<Classic_Material>(std::make_shared<Uniform_Metal>(
-                display::Colour(0.9, 0.9, 0.8), 1., 0.5, 0.5)),
+                display::Colour(0.9, 0.9, 0.8), 1., 0.5, 0.5, 1)),
             1.));
         s.add_light(std::make_shared<Point_Light>(
             structures::Vec3({ { 0, -1, 3 } }), 1.));
@@ -146,11 +146,11 @@ namespace environment
         s.add_object(std::make_shared<Sphere>(
             structures::Vec3({ { 1.5, -2, 0 } }),
             std::make_shared<Classic_Material>(std::make_shared<Uniform_Metal>(
-                display::Colour(0.2, 0.3, 0.7), 1., 0.5, 0.5)),
+                display::Colour(0.2, 0.3, 0.7), 1., 0.5, 0.5, 1)),
             1.));
         s.add_object(std::make_shared<Triangle>(
             std::make_shared<Classic_Material>(std::make_shared<Uniform_Metal>(
-                display::Colour(0.9, 0.9, 0.8), 0.7, 0.1, 0.1)),
+                display::Colour(0.9, 0.9, 0.8), 0.7, 0.1, 0.1, 1)),
             structures::Vec3({ { -1, 2, -2 } }),
             structures::Vec3({ { -1, -6, -2 } }),
             structures::Vec3({ { -1, -2, 6 } })));
@@ -232,7 +232,7 @@ namespace environment
         s.add_object(std::make_shared<Sphere>(
             structures::Vec3({ 0.5, -2, 2.4 }),
             std::make_shared<Classic_Material>(std::make_shared<Uniform_Metal>(
-                display::Colour(0.5, 0.5, 0.5), 1., 0.01, 0.01)),
+                display::Colour(0.5, 0.5, 0.5), 1., 0.01, 0.01, 1)),
             1.3));
         s.add_light(
             std::make_shared<Point_Light>(structures::Vec3({ 0, -1, 1 }), 1.));
@@ -242,21 +242,62 @@ namespace environment
 
     Scene &scene_relief_sphere_texture_reflect(Scene &s, const maps &m)
     {
+        auto reflexion = 0.1;
+        auto txt = std::make_shared<Image_Texture>(std::get<0>(m), 1., 0.7, 0.7,
+                                                   reflexion);
+        auto n_m = std::make_shared<Normal_Map>(std::get<1>(m));
+        auto h_m =
+            std::make_shared<Image_Texture>(std::get<2>(m), 0, 0, 0, reflexion);
         s.add_object(std::make_shared<Relief_Sphere>(
-            structures::Vec3({ 1.5, -2, 0 }),
-            std::make_shared<Relief_Material>(
-                std::make_shared<Image_Texture>(std::get<0>(m), 1., 0.7, 0.7,
-                                                0),
-                std::make_shared<Normal_Map>(std::get<1>(m)),
-                std::make_shared<Image_Texture>(std::get<2>(m), 0, 0, 0, 0)),
-            1.));
+            structures::Vec3({ -1.1, -2.5, 0 }),
+            std::make_shared<Relief_Material>(txt, n_m, h_m), 0.5));
         s.add_object(std::make_shared<Sphere>(
-            structures::Vec3({ 0.5, -2, 2.4 }),
-            std::make_shared<Classic_Material>(std::make_shared<Uniform_Metal>(
-                display::Colour(0.5, 0.5, 0.5), 1., 0.01, 0.01)),
-            1.3));
-        s.add_light(
-            std::make_shared<Point_Light>(structures::Vec3({ 0, -1, 1 }), 1.));
+            structures::Vec3({ 0, -2.5, 0 }),
+            std::make_shared<Classic_Material>(txt, n_m), 0.5));
+        s.add_object(std::make_shared<Sphere>(
+            structures::Vec3({ 1.1, -2.5, 0 }),
+            std::make_shared<Classic_Material>(txt), 0.5));
+        /*
+        s.add_object(std::make_shared<Sphere>(
+            structures::Vec3({ 0, -1.5, -2 }),
+            std::make_shared<Classic_Material>(std::make_shared<Uniform_Smooth>(
+                display::Colour(0.2, 0.7, 0.5), 1., 1., 1., 0.001)),
+            1.));
+            */
+        s.add_light(std::make_shared<Point_Light>(
+            structures::Vec3({ -0.5, -1, 2. }), 1.));
+
+        return s;
+    }
+
+    Scene &scene_normal(Scene &s, const maps &m)
+    {
+        auto reflexion = 0.001;
+        auto txt = std::make_shared<Image_Texture>(std::get<0>(m), 1., 0.7, 0.7,
+                                                   reflexion);
+        auto n_m = std::make_shared<Normal_Map>(std::get<1>(m));
+        s.add_object(std::make_shared<Sphere>(
+            structures::Vec3({ 0, -1.5, 0 }),
+            std::make_shared<Classic_Material>(txt, n_m), 0.5));
+        s.add_light(std::make_shared<Point_Light>(
+            structures::Vec3({ -0.5, -0.5, 1.5 }), 1.));
+
+        return s;
+    }
+
+    Scene &scene_relief(Scene &s, const maps &m)
+    {
+        auto reflexion = 0.001;
+        auto txt = std::make_shared<Image_Texture>(std::get<0>(m), 1., 0.7, 0.7,
+                                                   reflexion);
+        auto n_m = std::make_shared<Normal_Map>(std::get<1>(m));
+        auto h_m =
+            std::make_shared<Image_Texture>(std::get<2>(m), 0, 0, 0, reflexion);
+        s.add_object(std::make_shared<Relief_Sphere>(
+            structures::Vec3({ 0, -1.5, 0 }),
+            std::make_shared<Relief_Material>(txt, n_m, h_m), 0.5));
+        s.add_light(std::make_shared<Point_Light>(
+            structures::Vec3({ -0.5, -0.5, 1.5 }), 1.));
 
         return s;
     }

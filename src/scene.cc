@@ -79,7 +79,7 @@ namespace environment
                 * (std::get<1>(i_r.comps) * diff + ambiant_light_)
             + display::Colour(1., 1., 1.) * std::get<2>(i_r.comps) * spec;
         if (i_r.reflected * i_r.normal > 0)
-            res += std::get<0>(i_r.comps)
+            res += std::get<0>(i_r.comps) * std::get<4>(i_r.comps)
                 * cast_ray(Ray(intersection_point + i_r.reflected * 0.05,
                                i_r.reflected),
                            depth - 1);

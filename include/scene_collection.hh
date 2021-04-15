@@ -15,4 +15,6 @@ namespace environment
     Scene &scene_mesh(Scene &s, const maps &m, const model &mod);
     Scene &scene_sphere_texture_reflect(Scene &s, const maps &m);
     Scene &scene_relief_sphere_texture_reflect(Scene &s, const maps &m);
+    Scene &scene_relief(Scene &s, const maps &m);
+    Scene &scene_normal(Scene &s, const maps &m);
 } // namespace environment

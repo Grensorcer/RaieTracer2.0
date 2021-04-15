@@ -164,8 +164,8 @@ namespace environment
     Sphere::map_parametrics(const structures::Vec3 &p) const
     {
         auto uv = parametrics(p);
-        return std::make_pair(utils::fmodulo(uv.first / M_PI, 1),
-                              utils::fmodulo(uv.second / (2 * M_PI), 1));
+        return std::make_pair(utils::fmodulo(uv.first / M_PI - 0.1, 1),
+                              utils::fmodulo(uv.second / (2 * M_PI) + 0.25, 1));
     }
 
     structures::Vec3 Sphere::map_normal(const structures::Vec3 &n,

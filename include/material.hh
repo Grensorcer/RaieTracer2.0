@@ -21,7 +21,7 @@ namespace environment
         virtual ~Material() = default;
         virtual structures::Vec3 reflect(const structures::Vec3 &p,
                                          const structures::Vec3 &n) const;
-        virtual std::tuple<display::Colour, double, double, double>
+        virtual std::tuple<display::Colour, double, double, double, double>
         get_components(double u, double v) const;
         virtual structures::Vec3 normal(const structures::Vec3 &n,
                                         const structures::Vec3 &t,
